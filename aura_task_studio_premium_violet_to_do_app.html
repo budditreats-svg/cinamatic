@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en" x-data="todoApp()" :class="{ 'dark': isDarkMode }" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura - Modern Violet Task & Focus Studio</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        violet: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                            950: '#12072b',
+                        },
+                        obsidian: {
+                            900: '#0b0813',
+                            800: '#130d24',
+                            700: '#1a1330',
+                            600: '#231a3d',
+                        }
+                    },
+                    boxShadow: {
+                        'glow-sm': '0 0 15px -3px rgba(139, 92, 246, 0.3)',
+                        'glow-md': '0 0 25px -5px rgba(124, 58, 237, 0.4)',
+                        'glow-lg': '0 0 35px -5px rgba(167, 139, 250, 0.5)',
+                        'glow-red': '0 0 20px -3px rgba(239, 68, 68, 0.35)',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'check-pop': 'checkPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-6px)' },
+                        },
+                        checkPop: {
+                            '0%': { transform: 'scale(0.8)' },
+                            '50%': { transform: 'scale(1.2)' },
+                            '100%': { transform: 'scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Alpine.js CDN -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.25);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.5);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(221, 214, 254, 0.7);
+        }
+
+        .dark .glass-panel {
+            background: rgba(19, 13, 36, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.18);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(237, 233, 254, 0.8);
+        }
+
+        .dark .glass-card {
+            background: rgba(26, 19, 48, 0.55);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(139, 92, 246, 0.14);
+        }
+
+        .glass-input {
+            background: rgba(245, 243, 255, 0.65);
+            border: 1px solid rgba(196, 181, 253, 0.45);
+        }
+
+        .dark .glass-input {
+            background: rgba(15, 10, 29, 0.65);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+        }
+
+        /* Red Checkbox Custom Animation */
+        .task-checkbox:checked + .checkbox-visual {
+            background-color: #ef4444;
+            border-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+        }
+        
+        .task-checkbox:checked + .checkbox-visual .check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+
+<body class="bg-violet-50/50 dark:bg-obsidian-900 text-slate-800 dark:text-slate-100 font-sans min-h-screen transition-colors duration-300 antialiased selection:bg-violet-500 selection:text-white flex flex-col relative overflow-x-hidden">
+
+    <!-- Particle Confetti Canvas -->
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+    <!-- Background Ambient Glow Blobs -->
+    <div class="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-violet-400/20 dark:bg-violet-600/15 rounded-full filter blur-[120px] pointer-events-none animate-pulse-slow"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-fuchsia-400/15 dark:bg-indigo-600/15 rounded-full filter blur-[140px] pointer-events-none animate-pulse-slow" style="animation-delay: 2s;"></div>
+
+    <div class="flex-1 flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
+
+        <!-- HEADER NAVBAR -->
+        <header class="glass-panel rounded-3xl p-4 sm:p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-violet-900/5 dark:shadow-none">
+            <!-- Brand Logo & Time Tagline -->
+            <div class="flex items-center gap-3.5 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-violet-600 via-violet-500 to-fuchsia-400 flex items-center justify-center text-white shadow-glow-md">
+                        <i data-lucide="sparkles" class="w-6 h-6 animate-float"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-violet-900 via-violet-700 to-fuchsia-600 dark:from-white dark:via-violet-200 dark:to-fuchsia-300 bg-clip-text text-transparent">
+                            AURA
+                        </h1>
+                        <p class="text-xs font-medium text-violet-600/80 dark:text-violet-300/70" x-text="greetingText"></p>
+                    </div>
+                </div>
+
+                <!-- Mobile Quick Actions -->
+                <div class="flex items-center gap-2 sm:hidden">
+                    <button @click="toggleTheme()" class="p-2.5 rounded-xl bg-violet-100/80 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300">
+                        <i data-lucide="sun" x-show="isDarkMode" class="w-5 h-5"></i>
+                        <i data-lucide="moon" x-show="!isDarkMode" class="w-5 h-5"></i>
+                    </button>
+                    <button @click="toggleSound()" class="p-2.5 rounded-xl bg-violet-100/80 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300">
+                        <i data-lucide="volume-2" x-show="soundEnabled" class="w-5 h-5"></i>
+                        <i data-lucide="volume-x" x-show="!soundEnabled" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Header Middle Search Bar -->
+            <div class="w-full sm:max-w-md relative">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-violet-400 dark:text-violet-400"></i>
+                <input 
+                    type="text" 
+                    x-model="searchQuery" 
+                    placeholder="Search tasks or categories... (Press '/')"
+                    @keydown.window.slash.prevent="$el.focus()"
+                    class="w-full pl-10 pr-10 py-2.5 text-sm rounded-2xl glass-input text-slate-800 dark:text-slate-100 placeholder-violet-400/70 dark:placeholder-violet-400/50 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all"
+                >
+                <button 
+                    x-show="searchQuery" 
+                    @click="searchQuery = ''" 
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-violet-400 hover:text-violet-600 dark:hover:text-violet-200"
+                >
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Header Right Desktop Controls -->
+            <div class="hidden sm:flex items-center gap-3">
+                <!-- Productivity Analytics Button -->
+                <button 
+                    @click="showAnalyticsModal = true" 
+                    title="View Productivity Analytics"
+                    class="p-2.5 rounded-2xl bg-violet-100/80 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-500/20 hover:border-violet-500/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 text-xs font-semibold"
+                >
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-violet-500"></i>
+                    <span>Progress Hub</span>
+                </button>
+
+                <!-- Sound Effects Toggle -->
+                <button 
+                    @click="toggleSound()" 
+                    title="Toggle UI Audio Effects"
+                    :class="soundEnabled ? 'bg-violet-600/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300 border-violet-500/30' : 'bg-slate-200/50 dark:bg-slate-800/50 text-slate-400 border-transparent'"
+                    class="p-2.5 rounded-2xl border transition-all hover:scale-105 active:scale-95 flex items-center gap-2 text-xs font-semibold"
+                >
+                    <i data-lucide="volume-2" x-show="soundEnabled" class="w-4 h-4 text-violet-500"></i>
+                    <i data-lucide="volume-x" x-show="!soundEnabled" class="w-4 h-4"></i>
+                    <span x-text="soundEnabled ? 'Audio On' : 'Muted'"></span>
+                </button>
+
+                <!-- Focus Timer Drawer Button -->
+                <button 
+                    @click="showTimerModal = !showTimerModal" 
+                    class="p-2.5 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-glow-sm hover:shadow-glow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-2 text-xs font-semibold"
+                >
+                    <i data-lucide="timer" class="w-4 h-4"></i>
+                    <span>Focus Timer</span>
+                    <span x-show="timer.running" class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuchsia-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-fuchsia-300"></span>
+                    </span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button 
+                    @click="toggleTheme()" 
+                    title="Toggle Light/Dark Theme"
+                    class="p-2.5 rounded-2xl glass-input text-violet-700 dark:text-violet-300 hover:bg-violet-200/50 dark:hover:bg-violet-900/50 transition-all hover:scale-105 active:scale-95"
+                >
+                    <i data-lucide="sun" x-show="isDarkMode" class="w-4.5 h-4.5"></i>
+                    <i data-lucide="moon" x-show="!isDarkMode" class="w-4.5 h-4.5"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN DASHBOARD CONTENT GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- SIDEBAR (4 Cols) -->
+            <aside class="lg:col-span-4 space-y-6">
+                
+                <!-- Daily Progress & Stats Card -->
+                <div class="glass-panel rounded-3xl p-5 relative overflow-hidden group">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all"></div>
+                    
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold tracking-wider uppercase text-violet-600 dark:text-violet-400">Daily Momentum</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30" x-text="completionPercentage + '% Completed'"></span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-300" x-text="pendingPercentage + '% Pending'"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="text-2xl font-black text-slate-800 dark:text-white flex items-baseline gap-2">
+                                <span class="text-red-500 dark:text-red-400" x-text="completedCount"></span>
+                                <span class="text-xs text-slate-400 uppercase font-semibold">Done</span>
+                                <span class="text-slate-300 dark:text-slate-700">|</span>
+                                <span class="text-violet-600 dark:text-violet-300" x-text="pendingCount"></span>
+                                <span class="text-xs text-slate-400 uppercase font-semibold">Pending</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" x-text="getMotivationQuote()"></p>
+                        </div>
+
+                        <!-- Mini Ring Graphic -->
+                        <div class="relative w-14 h-14 flex items-center justify-center shrink-0 cursor-pointer" @click="showAnalyticsModal = true" title="Click for detailed stats">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-violet-200 dark:text-violet-950" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="text-red-500 transition-all duration-700 ease-out" stroke-dasharray="100" :stroke-dashoffset="100 - completionPercentage" stroke-linecap="round" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <i data-lucide="pie-chart" class="w-5 h-5 absolute text-violet-600 dark:text-violet-300"></i>
+                        </div>
+                    </div>
+
+                    <!-- Dual Progress Stacked Bar -->
+                    <div class="w-full h-3 bg-violet-100 dark:bg-violet-950/80 rounded-full overflow-hidden flex p-0.5 mb-3">
+                        <!-- Completed Segment (Red) -->
+                        <div class="h-full bg-gradient-to-r from-rose-500 to-red-500 rounded-l-full transition-all duration-500" :style="'width: ' + completionPercentage + '%'"></div>
+                        <!-- Pending Segment (Violet) -->
+                        <div class="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-r-full transition-all duration-500" :style="'width: ' + pendingPercentage + '%'"></div>
+                    </div>
+
+                    <!-- Open Detailed Analytics Modal CTA -->
+                    <button 
+                        @click="showAnalyticsModal = true"
+                        class="w-full py-2 rounded-xl bg-violet-500/10 hover:bg-violet-500/20 text-violet-700 dark:text-violet-300 text-xs font-bold transition-all flex items-center justify-center gap-2 border border-violet-500/20"
+                    >
+                        <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                        <span>Explore Productivity Analytics</span>
+                    </button>
+                </div>
+
+                <!-- Navigation Views & Categories -->
+                <div class="glass-panel rounded-3xl p-5 space-y-5">
+                    
+                    <!-- Primary Filters -->
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-violet-400/70 mb-3 px-2">Views</h4>
+                        <nav class="space-y-1">
+                            <button 
+                                @click="activeFilter = 'all'; selectedCategory = 'all'; viewMode = 'board'" 
+                                :class="activeFilter === 'all' && selectedCategory === 'all' ? 'bg-violet-600 text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-violet-100/50 dark:hover:bg-violet-900/30'"
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="layers" class="w-4 h-4"></i>
+                                    <span>All Categories Board</span>
+                                </div>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-black/10 dark:bg-white/10" x-text="tasks.length"></span>
+                            </button>
+
+                            <button 
+                                @click="activeFilter = 'today'" 
+                                :class="activeFilter === 'today' ? 'bg-violet-600 text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-violet-100/50 dark:hover:bg-violet-900/30'"
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                                    <span>Due Today</span>
+                                </div>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-black/10 dark:bg-white/10" x-text="todayCount"></span>
+                            </button>
+
+                            <button 
+                                @click="activeFilter = 'starred'" 
+                                :class="activeFilter === 'starred' ? 'bg-violet-600 text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-violet-100/50 dark:hover:bg-violet-900/30'"
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                    <span>Starred</span>
+                                </div>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-black/10 dark:bg-white/10" x-text="starredCount"></span>
+                            </button>
+
+                            <button 
+                                @click="activeFilter = 'completed'" 
+                                :class="activeFilter === 'completed' ? 'bg-red-600 text-white shadow-glow-red' : 'text-slate-600 dark:text-slate-300 hover:bg-red-500/10 dark:hover:bg-red-900/20'"
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-red-500"></i>
+                                    <span>Completed</span>
+                                </div>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-red-100" x-text="completedCount"></span>
+                            </button>
+                        </nav>
+                    </div>
+
+                    <div class="h-px bg-violet-200/60 dark:bg-violet-900/40 my-2"></div>
+
+                    <!-- Categories Sidebar Navigation -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3 px-2">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-violet-400/70">Categories</h4>
+                            <button @click="promptNewCategory()" class="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <button 
+                                @click="selectedCategory = 'all'; viewMode = 'board'" 
+                                :class="selectedCategory === 'all' ? 'bg-violet-500/15 text-violet-700 dark:text-violet-300 border border-violet-500/30 font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-violet-100/40 dark:hover:bg-violet-900/20'"
+                                class="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-sm transition-all group"
+                            >
+                                <div class="flex items-center gap-2.5">
+                                    <i data-lucide="layout-grid" class="w-4 h-4 text-violet-500"></i>
+                                    <span>All Sections Board</span>
+                                </div>
+                                <span class="text-xs text-slate-400 dark:text-slate-500" x-text="tasks.length"></span>
+                            </button>
+
+                            <template x-for="cat in categories" :key="cat.name">
+                                <button 
+                                    @click="selectedCategory = cat.name; viewMode = 'tab'" 
+                                    :class="selectedCategory === cat.name ? 'bg-violet-500/15 text-violet-700 dark:text-violet-300 border border-violet-500/30 font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-violet-100/40 dark:hover:bg-violet-900/20'"
+                                    class="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-sm transition-all group"
+                                >
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="w-2.5 h-2.5 rounded-full" :style="'background-color: ' + cat.color"></span>
+                                        <span x-text="cat.name"></span>
+                                    </div>
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-slate-200/60 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400" x-text="getCategoryCount(cat.name)"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ambient Sound Player Banner -->
+                <div class="glass-panel rounded-3xl p-4 flex items-center justify-between border-violet-500/20">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 rounded-2xl bg-violet-600/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300">
+                            <i data-lucide="headphones" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Focus Atmosphere</h5>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400" x-text="ambientAudio.playing ? 'Playing Pink Noise Stream' : 'Calm focus ambient drone'"></p>
+                        </div>
+                    </div>
+                    <button 
+                        @click="toggleAmbientSound()" 
+                        :class="ambientAudio.playing ? 'bg-fuchsia-600 text-white shadow-glow-sm' : 'bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-300'"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:scale-105 active:scale-95"
+                    >
+                        <span x-text="ambientAudio.playing ? 'Pause' : 'Listen'"></span>
+                    </button>
+                </div>
+
+            </aside>
+
+            <!-- MAIN TASK FEED (8 Cols) -->
+            <main class="lg:col-span-8 space-y-5">
+                
+                <!-- Category Tab Switcher Bar -->
+                <div class="glass-panel rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar shadow-sm">
+                    <button 
+                        @click="selectedCategory = 'all'; viewMode = 'board'" 
+                        :class="selectedCategory === 'all' && viewMode === 'board' ? 'bg-violet-600 text-white shadow-glow-sm font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-violet-100/50 dark:hover:bg-violet-900/30'"
+                        class="px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 shrink-0"
+                    >
+                        <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+                        <span>Categorized Board</span>
+                    </button>
+
+                    <template x-for="cat in categories" :key="cat.name">
+                        <button 
+                            @click="selectedCategory = cat.name; viewMode = 'tab'; newTask.category = cat.name" 
+                            :class="selectedCategory === cat.name ? 'bg-violet-600 text-white shadow-glow-sm font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-violet-100/50 dark:hover:bg-violet-900/30'"
+                            class="px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 shrink-0"
+                        >
+                            <span class="w-2 h-2 rounded-full" :style="'background-color: ' + cat.color"></span>
+                            <span x-text="cat.name"></span>
+                            <span 
+                                class="text-[10px] px-1.5 py-0.2 rounded-full font-extrabold"
+                                :class="selectedCategory === cat.name ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400'"
+                                x-text="getCategoryCount(cat.name)"
+                            ></span>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Quick Task Add Card -->
+                <div class="glass-panel rounded-3xl p-4 sm:p-5 shadow-xl shadow-violet-900/5 dark:shadow-none border-violet-400/30 dark:border-violet-600/30">
+                    <form @submit.prevent="addTask()">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 rounded-full border-2 border-violet-400/50 flex items-center justify-center shrink-0">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5 text-violet-500"></i>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    x-model="newTask.title" 
+                                    :placeholder="selectedCategory !== 'all' ? 'Add a new task in ' + selectedCategory + '...' : 'What would you like to accomplish today?'" 
+                                    class="w-full bg-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-violet-300/40 font-medium text-base sm:text-lg focus:outline-none"
+                                    required
+                                >
+                            </div>
+
+                            <!-- Expandable Task Properties Tray -->
+                            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-violet-100 dark:border-violet-900/40 text-xs">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    
+                                    <!-- Priority Selector -->
+                                    <div class="relative" x-data="{ open: false }">
+                                        <button 
+                                            type="button" 
+                                            @click="open = !open" 
+                                            class="px-3 py-1.5 rounded-xl glass-input flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:border-violet-400"
+                                        >
+                                            <span class="w-2 h-2 rounded-full" :class="getPriorityColor(newTask.priority)"></span>
+                                            <span class="capitalize" x-text="newTask.priority + ' Priority'"></span>
+                                            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                                        </button>
+
+                                        <div x-show="open" @click.outside="open = false" x-cloak class="absolute left-0 mt-1 w-36 glass-card rounded-2xl p-1.5 shadow-xl z-30 space-y-1">
+                                            <button type="button" @click="newTask.priority = 'high'; open = false" class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/50 text-xs font-medium">
+                                                <span class="w-2 h-2 rounded-full bg-rose-500"></span> High
+                                            </button>
+                                            <button type="button" @click="newTask.priority = 'medium'; open = false" class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/50 text-xs font-medium">
+                                                <span class="w-2 h-2 rounded-full bg-amber-500"></span> Medium
+                                            </button>
+                                            <button type="button" @click="newTask.priority = 'low'; open = false" class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/50 text-xs font-medium">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Low
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Category Selector -->
+                                    <select 
+                                        x-model="newTask.category" 
+                                        class="px-3 py-1.5 rounded-xl glass-input text-slate-700 dark:text-slate-300 focus:outline-none hover:border-violet-400 cursor-pointer"
+                                    >
+                                        <template x-for="cat in categories" :key="cat.name">
+                                            <option :value="cat.name" x-text="cat.name" class="bg-white dark:bg-obsidian-800"></option>
+                                        </template>
+                                    </select>
+
+                                    <!-- Due Date Selector -->
+                                    <input 
+                                        type="date" 
+                                        x-model="newTask.dueDate" 
+                                        class="px-3 py-1.5 rounded-xl glass-input text-slate-700 dark:text-slate-300 focus:outline-none hover:border-violet-400 cursor-pointer"
+                                    >
+                                </div>
+
+                                <!-- Add Button -->
+                                <button 
+                                    type="submit" 
+                                    class="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-glow-sm hover:shadow-glow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5"
+                                >
+                                    <span>Add Task</span>
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Sorting & Quick Controls Header -->
+                <div class="flex items-center justify-between px-2 text-xs font-semibold text-slate-500 dark:text-violet-300/70">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-slate-800 dark:text-slate-100" x-text="activeFilterTitle"></span>
+                        <span class="px-2 py-0.5 rounded-full bg-violet-200/50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300" x-text="filteredTasks.length"></span>
+                    </div>
+
+                    <!-- Sort Dropdown -->
+                    <div class="flex items-center gap-2">
+                        <span>Sort by:</span>
+                        <select x-model="sortBy" class="bg-transparent text-violet-700 dark:text-violet-300 font-bold focus:outline-none cursor-pointer">
+                            <option value="created" class="bg-white dark:bg-obsidian-800">Date Created</option>
+                            <option value="priority" class="bg-white dark:bg-obsidian-800">Priority</option>
+                            <option value="dueDate" class="bg-white dark:bg-obsidian-800">Due Date</option>
+                            <option value="alphabetical" class="bg-white dark:bg-obsidian-800">Alphabetical</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- VIEW MODE 1: CATEGORIZED BOARD SECTIONS (When All or Board view is active) -->
+                <template x-if="selectedCategory === 'all' || viewMode === 'board'">
+                    <div class="space-y-6">
+                        <template x-for="cat in categories" :key="cat.name">
+                            <div class="glass-panel rounded-3xl p-5 border-t-4 shadow-lg transition-all" :style="'border-top-color: ' + cat.color">
+                                <!-- Category Section Banner Header -->
+                                <div class="flex items-center justify-between mb-4 pb-2 border-b border-violet-100 dark:border-violet-900/30">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-sm" :style="'background-color: ' + cat.color">
+                                            <i :data-lucide="getCategoryIcon(cat.name)" class="w-5 h-5"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                                <span x-text="cat.name"></span>
+                                                <span class="text-xs px-2 py-0.5 rounded-full font-semibold bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300" x-text="getCategoryCount(cat.name) + ' tasks'"></span>
+                                            </h3>
+                                            <p class="text-[11px] text-slate-400 dark:text-slate-500" x-text="getCategorySubtitle(cat.name)"></p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quick Add into this specific Category -->
+                                    <button 
+                                        @click="selectedCategory = cat.name; viewMode = 'tab'; newTask.category = cat.name"
+                                        class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-violet-100/60 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-800 transition-all flex items-center gap-1"
+                                    >
+                                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add to <span x-text="cat.name"></span>
+                                    </button>
+                                </div>
+
+                                <!-- Tasks in this Category Section -->
+                                <div class="space-y-3">
+                                    <template x-for="task in getTasksByCategory(cat.name)" :key="task.id">
+                                        <div 
+                                            class="glass-card rounded-2xl p-3.5 transition-all duration-300 hover:shadow-lg group border-l-4"
+                                            :class="{
+                                                'border-l-red-500 bg-red-500/10 dark:bg-red-950/30 border-red-200/50 dark:border-red-900/40': task.completed,
+                                                'border-l-rose-500': task.priority === 'high' && !task.completed,
+                                                'border-l-amber-500': task.priority === 'medium' && !task.completed,
+                                                'border-l-emerald-500': task.priority === 'low' && !task.completed
+                                            }"
+                                        >
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div class="flex items-start gap-3 flex-1 min-w-0">
+                                                    <label class="relative flex items-center justify-center mt-1 cursor-pointer select-none">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            :checked="task.completed" 
+                                                            @change="toggleTaskCompletion(task, $event)" 
+                                                            class="task-checkbox sr-only"
+                                                        >
+                                                        <div class="checkbox-visual w-5 h-5 rounded-lg border-2 border-violet-400/60 dark:border-violet-500/40 flex items-center justify-center transition-all duration-200 group-hover:border-red-500">
+                                                            <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-white opacity-0 transform scale-50 transition-all duration-200"></i>
+                                                        </div>
+                                                    </label>
+
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="flex items-center gap-2">
+                                                            <h4 
+                                                                x-text="task.title" 
+                                                                class="font-semibold text-sm text-slate-800 dark:text-slate-100 truncate transition-all"
+                                                                :class="{ 'line-through text-red-600 dark:text-red-400 font-bold decoration-red-500 decoration-2': task.completed }"
+                                                            ></h4>
+                                                            <button @click="toggleStar(task)" class="focus:outline-none">
+                                                                <i 
+                                                                    data-lucide="star" 
+                                                                    class="w-3.5 h-3.5 transition-all hover:scale-125"
+                                                                    :class="task.starred ? 'text-amber-400 fill-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-300'"
+                                                                ></i>
+                                                            </button>
+                                                        </div>
+
+                                                        <div class="flex flex-wrap items-center gap-2 mt-1.5">
+                                                            <template x-if="task.completed">
+                                                                <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300 border border-red-300/60 dark:border-red-800/80 flex items-center gap-1">
+                                                                    <i data-lucide="check-circle-2" class="w-3 h-3 text-red-600 dark:text-red-400"></i> Completed
+                                                                </span>
+                                                            </template>
+
+                                                            <span 
+                                                                class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
+                                                                :class="{
+                                                                    'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300': task.priority === 'high',
+                                                                    'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300': task.priority === 'medium',
+                                                                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300': task.priority === 'low'
+                                                                }"
+                                                                x-text="task.priority"
+                                                            ></span>
+
+                                                            <template x-if="task.dueDate">
+                                                                <span 
+                                                                    class="px-2 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1"
+                                                                    :class="isOverdue(task.dueDate) && !task.completed ? 'bg-red-500/15 text-red-600 dark:text-red-400 font-bold' : 'text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60'"
+                                                                >
+                                                                    <i data-lucide="clock" class="w-3 h-3"></i>
+                                                                    <span x-text="formatDueDate(task.dueDate)"></span>
+                                                                </span>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                    <button @click="openEditModal(task)" class="p-1 rounded-lg text-slate-400 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-900/40">
+                                                        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                    <button @click="deleteTask(task.id)" class="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-950/40">
+                                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- Empty Section Callout -->
+                                    <div x-show="getTasksByCategory(cat.name).length === 0" class="p-4 rounded-2xl border border-dashed border-violet-200 dark:border-violet-900/40 text-center text-xs text-slate-400 dark:text-slate-500">
+                                        No tasks in <span x-text="cat.name"></span> yet. Click "Add to <span x-text="cat.name"></span>" above to create one!
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- VIEW MODE 2: SINGLE CATEGORY TAB FOCUSED VIEW -->
+                <template x-if="selectedCategory !== 'all' && viewMode === 'tab'">
+                    <div class="space-y-3">
+                        <template x-for="task in filteredTasks" :key="task.id">
+                            <div 
+                                class="glass-card rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:shadow-violet-900/5 group border-l-4"
+                                :class="{
+                                    'border-l-red-500 bg-red-500/10 dark:bg-red-950/30 border-red-200/50 dark:border-red-900/40': task.completed,
+                                    'border-l-rose-500': task.priority === 'high' && !task.completed,
+                                    'border-l-amber-500': task.priority === 'medium' && !task.completed,
+                                    'border-l-emerald-500': task.priority === 'low' && !task.completed
+                                }"
+                            >
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex items-start gap-3.5 flex-1 min-w-0">
+                                        <label class="relative flex items-center justify-center mt-1 cursor-pointer select-none">
+                                            <input 
+                                                type="checkbox" 
+                                                :checked="task.completed" 
+                                                @change="toggleTaskCompletion(task, $event)" 
+                                                class="task-checkbox sr-only"
+                                            >
+                                            <div class="checkbox-visual w-5 h-5 rounded-lg border-2 border-violet-400/60 dark:border-violet-500/40 flex items-center justify-center transition-all duration-200 group-hover:border-red-500">
+                                                <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-white opacity-0 transform scale-50 transition-all duration-200"></i>
+                                            </div>
+                                        </label>
+
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <h3 
+                                                    x-text="task.title" 
+                                                    class="font-semibold text-sm sm:text-base text-slate-800 dark:text-slate-100 transition-all truncate"
+                                                    :class="{ 'line-through text-red-600 dark:text-red-400 font-bold decoration-red-500 decoration-2': task.completed }"
+                                                ></h3>
+
+                                                <button @click="toggleStar(task)" class="focus:outline-none">
+                                                    <i 
+                                                        data-lucide="star" 
+                                                        class="w-4 h-4 transition-all hover:scale-125"
+                                                        :class="task.starred ? 'text-amber-400 fill-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-300'"
+                                                    ></i>
+                                                </button>
+                                            </div>
+
+                                            <div class="flex flex-wrap items-center gap-2 mt-2">
+                                                <template x-if="task.completed">
+                                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300 border border-red-300/60 dark:border-red-800/80 flex items-center gap-1">
+                                                        <i data-lucide="check-circle-2" class="w-3 h-3 text-red-600 dark:text-red-400"></i>
+                                                        Completed
+                                                    </span>
+                                                </template>
+
+                                                <span 
+                                                    class="px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1"
+                                                    :style="'background-color: ' + getCategoryColor(task.category) + '20; color: ' + getCategoryColor(task.category)"
+                                                >
+                                                    <span class="w-1.5 h-1.5 rounded-full" :style="'background-color: ' + getCategoryColor(task.category)"></span>
+                                                    <span x-text="task.category"></span>
+                                                </span>
+
+                                                <span 
+                                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
+                                                    :class="{
+                                                        'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300': task.priority === 'high',
+                                                        'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300': task.priority === 'medium',
+                                                        'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300': task.priority === 'low'
+                                                    }"
+                                                    x-text="task.priority"
+                                                ></span>
+
+                                                <template x-if="task.dueDate">
+                                                    <span 
+                                                        class="px-2 py-0.5 rounded-md text-[11px] font-medium flex items-center gap-1"
+                                                        :class="isOverdue(task.dueDate) && !task.completed ? 'bg-red-500/15 text-red-600 dark:text-red-400 font-bold' : 'text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60'"
+                                                    >
+                                                        <i data-lucide="clock" class="w-3 h-3"></i>
+                                                        <span x-text="formatDueDate(task.dueDate)"></span>
+                                                    </span>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                                        <button @click="openEditModal(task)" class="p-1.5 rounded-lg text-slate-400 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-900/40">
+                                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                                        </button>
+                                        <button @click="deleteTask(task.id)" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-950/40">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Empty State Graphic -->
+                        <div x-show="filteredTasks.length === 0" class="glass-panel rounded-3xl p-10 text-center space-y-4 my-6">
+                            <div class="w-16 h-16 rounded-3xl bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-300 flex items-center justify-center mx-auto shadow-glow-sm">
+                                <i data-lucide="sparkles" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-base font-bold text-slate-800 dark:text-slate-200">No tasks in this view</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1">
+                                    Everything looks clean in <span class="font-bold text-violet-500" x-text="selectedCategory"></span>. Create a task above to get started!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+            </main>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="mt-12 text-center text-xs text-slate-400 dark:text-violet-400/50 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-violet-200/40 dark:border-violet-900/20 gap-2">
+            <span>Designed for mindful productivity & focus</span>
+            <div class="flex items-center gap-4">
+                <span class="hover:text-violet-500 transition-colors cursor-pointer" @click="clearCompletedTasks()">Clear Completed</span>
+                <span>•</span>
+                <span x-text="tasks.length + ' Total Tasks Saved'"></span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- CUSTOM TOAST NOTIFICATION -->
+    <div 
+        x-show="toast.show" 
+        x-transition:enter="transition ease-out duration-300 transform"
+        x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+        x-transition:leave="transition ease-in duration-200 transform"
+        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+        x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+        class="fixed bottom-6 right-6 z-50 max-w-md px-5 py-3.5 rounded-2xl glass-panel border border-violet-500/30 shadow-2xl flex items-center gap-3 text-slate-100 bg-obsidian-800/90"
+        x-cloak
+    >
+        <div class="p-2 rounded-xl bg-violet-600/30 text-violet-300">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+        </div>
+        <div>
+            <h5 class="text-xs font-bold text-violet-200">Aura Studio</h5>
+            <p class="text-xs text-slate-300" x-text="toast.message"></p>
+        </div>
+        <button @click="toast.show = false" class="ml-2 text-slate-400 hover:text-white">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <!-- POMODORO FOCUS TIMER MODAL -->
+    <div 
+        x-show="showTimerModal" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-900/80 backdrop-blur-md"
+        x-cloak
+    >
+        <div @click.outside="showTimerModal = false" class="glass-panel rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl border-violet-500/30 text-center space-y-6">
+            
+            <button @click="showTimerModal = false" class="absolute right-4 top-4 text-slate-400 hover:text-white p-1 rounded-full">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30 uppercase tracking-widest">
+                    Focus Studio
+                </span>
+                <h3 class="text-2xl font-black text-white mt-2">Pomodoro Session</h3>
+            </div>
+
+            <!-- Timer Circle Display -->
+            <div class="relative w-48 h-48 mx-auto flex items-center justify-center">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <path class="text-violet-950" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="text-violet-500 transition-all duration-1000 ease-linear" stroke-dasharray="100" :stroke-dashoffset="100 - timerPercentage" stroke-linecap="round" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="text-4xl font-black tracking-tight text-white font-mono" x-text="formatTime(timer.timeLeft)"></span>
+                    <span class="text-xs text-violet-300 font-semibold mt-1 uppercase" x-text="timer.mode + ' Time'"></span>
+                </div>
+            </div>
+
+            <!-- Mode Selector Buttons -->
+            <div class="flex items-center justify-center gap-2">
+                <button 
+                    @click="setTimerMode('work')" 
+                    :class="timer.mode === 'work' ? 'bg-violet-600 text-white shadow-glow-sm' : 'bg-violet-950/60 text-violet-300 hover:bg-violet-900/50'"
+                    class="px-4 py-1.5 rounded-xl text-xs font-bold transition-all"
+                >
+                    Focus (25m)
+                </button>
+                <button 
+                    @click="setTimerMode('shortBreak')" 
+                    :class="timer.mode === 'shortBreak' ? 'bg-violet-600 text-white shadow-glow-sm' : 'bg-violet-950/60 text-violet-300 hover:bg-violet-900/50'"
+                    class="px-4 py-1.5 rounded-xl text-xs font-bold transition-all"
+                >
+                    Break (5m)
+                </button>
+            </div>
+
+            <!-- Play/Pause & Reset Controls -->
+            <div class="flex items-center justify-center gap-4 pt-2">
+                <button 
+                    @click="toggleTimer()" 
+                    class="px-8 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-sm shadow-glow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                >
+                    <i data-lucide="play" x-show="!timer.running" class="w-4 h-4 fill-white"></i>
+                    <i data-lucide="pause" x-show="timer.running" class="w-4 h-4 fill-white"></i>
+                    <span x-text="timer.running ? 'Pause' : 'Start Focus'"></span>
+                </button>
+
+                <button 
+                    @click="resetTimer()" 
+                    class="p-3 rounded-2xl bg-violet-950/80 text-violet-300 hover:bg-violet-900 hover:text-white transition-all"
+                    title="Reset Timer"
+                >
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TASK EDIT MODAL -->
+    <div 
+        x-show="showEditModal" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-900/80 backdrop-blur-md"
+        x-cloak
+    >
+        <div @click.outside="showEditModal = false" class="glass-panel rounded-3xl p-6 max-w-lg w-full relative shadow-2xl border-violet-500/30 space-y-4">
+            <div class="flex items-center justify-between border-b border-violet-800/40 pb-3">
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i data-lucide="edit-3" class="w-4 h-4 text-violet-500"></i> Edit Task Details
+                </h3>
+                <button @click="showEditModal = false" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <template x-if="editingTask">
+                <div class="space-y-4 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-500 dark:text-violet-300 mb-1">Task Title</label>
+                        <input type="text" x-model="editingTask.title" class="w-full p-2.5 rounded-xl glass-input text-slate-800 dark:text-slate-100 font-medium">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-500 dark:text-violet-300 mb-1">Priority</label>
+                            <select x-model="editingTask.priority" class="w-full p-2.5 rounded-xl glass-input text-slate-800 dark:text-slate-100">
+                                <option value="high" class="bg-white dark:bg-obsidian-800">High</option>
+                                <option value="medium" class="bg-white dark:bg-obsidian-800">Medium</option>
+                                <option value="low" class="bg-white dark:bg-obsidian-800">Low</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-500 dark:text-violet-300 mb-1">Category</label>
+                            <select x-model="editingTask.category" class="w-full p-2.5 rounded-xl glass-input text-slate-800 dark:text-slate-100">
+                                <template x-for="cat in categories" :key="cat.name">
+                                    <option :value="cat.name" x-text="cat.name" class="bg-white dark:bg-obsidian-800"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-500 dark:text-violet-300 mb-1">Due Date</label>
+                        <input type="date" x-model="editingTask.dueDate" class="w-full p-2.5 rounded-xl glass-input text-slate-800 dark:text-slate-100">
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-3">
+                        <button @click="showEditModal = false" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">Cancel</button>
+                        <button @click="saveEditedTask()" class="px-5 py-2 rounded-xl bg-violet-600 text-white font-bold shadow-glow-sm hover:bg-violet-500">Save Changes</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- PRODUCTIVITY & ANALYTICS DASHBOARD MODAL -->
+    <div 
+        x-show="showAnalyticsModal" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-obsidian-900/85 backdrop-blur-md overflow-y-auto"
+        x-cloak
+    >
+        <div @click.outside="showAnalyticsModal = false" class="glass-panel rounded-3xl p-6 sm:p-8 max-w-2xl w-full relative shadow-2xl border-violet-500/30 my-8 space-y-6">
+            
+            <button @click="showAnalyticsModal = false" class="absolute right-5 top-5 text-slate-400 hover:text-white p-1 rounded-full transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Dashboard Header -->
+            <div class="flex items-center gap-3 border-b border-violet-800/40 pb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-500 flex items-center justify-center text-white shadow-glow-md">
+                    <i data-lucide="activity" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-extrabold text-white">Productivity & Progress Hub</h3>
+                    <p class="text-xs text-violet-300">Detailed breakdown of your completed tasks, pending items & category momentum</p>
+                </div>
+            </div>
+
+            <!-- Top Metric Cards Row -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <!-- Completed Card -->
+                <div class="glass-card rounded-2xl p-3.5 border-l-4 border-l-red-500 bg-red-500/10">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-red-400">Completed</span>
+                    <h4 class="text-2xl font-black text-white mt-1" x-text="completedCount"></h4>
+                    <span class="text-[11px] font-semibold text-red-300" x-text="completionPercentage + '% of total'"></span>
+                </div>
+
+                <!-- Pending Card -->
+                <div class="glass-card rounded-2xl p-3.5 border-l-4 border-l-violet-500 bg-violet-500/10">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-violet-300">Pending</span>
+                    <h4 class="text-2xl font-black text-white mt-1" x-text="pendingCount"></h4>
+                    <span class="text-[11px] font-semibold text-violet-300" x-text="pendingPercentage + '% remaining'"></span>
+                </div>
+
+                <!-- High Priority Pending Card -->
+                <div class="glass-card rounded-2xl p-3.5 border-l-4 border-l-amber-500 bg-amber-500/10">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Urgent Pending</span>
+                    <h4 class="text-2xl font-black text-white mt-1" x-text="highPriorityPendingCount"></h4>
+                    <span class="text-[11px] font-semibold text-amber-300">High priority tasks</span>
+                </div>
+
+                <!-- Productivity Score Rank -->
+                <div class="glass-card rounded-2xl p-3.5 border-l-4 border-l-fuchsia-500 bg-fuchsia-500/10">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-fuchsia-300">Current Rank</span>
+                    <h4 class="text-sm font-extrabold text-white mt-2.5 truncate" x-text="productivityRank"></h4>
+                    <span class="text-[10px] text-fuchsia-300">Based on momentum</span>
+                </div>
+            </div>
+
+            <!-- Large Circular Chart & Task Distribution Summary -->
+            <div class="glass-card rounded-3xl p-5 grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
+                <!-- Circular Chart Column -->
+                <div class="sm:col-span-5 flex flex-col items-center justify-center">
+                    <div class="relative w-36 h-36 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <!-- Background Track -->
+                            <path class="text-violet-950" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <!-- Pending Segment (Violet) -->
+                            <path class="text-violet-500" stroke-dasharray="100" stroke-dashoffset="0" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <!-- Completed Segment (Red Overlay) -->
+                            <path class="text-red-500 transition-all duration-1000 ease-out" stroke-dasharray="100" :stroke-dashoffset="100 - completionPercentage" stroke-linecap="round" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                            <span class="text-2xl font-black text-white" x-text="completionPercentage + '%'"></span>
+                            <span class="text-[10px] font-bold text-red-400 uppercase tracking-widest">Achieved</span>
+                        </div>
+                    </div>
+                    <span class="text-xs text-slate-400 mt-2 font-medium">Overall Completion Ratio</span>
+                </div>
+
+                <!-- Distribution Details Column -->
+                <div class="sm:col-span-7 space-y-3">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Task Ratio Breakdown</h4>
+                    
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-red-400 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-red-500"></span> Completed Tasks
+                            </span>
+                            <span class="text-white" x-text="completedCount + ' tasks (' + completionPercentage + '%)'"></span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-red-500 transition-all duration-500" :style="'width: ' + completionPercentage + '%'"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-violet-400 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-violet-500"></span> Pending Tasks
+                            </span>
+                            <span class="text-white" x-text="pendingCount + ' tasks (' + pendingPercentage + '%)'"></span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-violet-500 transition-all duration-500" :style="'width: ' + pendingPercentage + '%'"></div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <div class="p-3 rounded-xl bg-violet-950/60 border border-violet-800/40 text-xs text-violet-200">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400 inline mr-1"></i>
+                            <span x-text="getMotivationQuote()"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Progress Breakdown List -->
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">Progress by Category</h4>
+                <div class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                    <template x-for="cat in categories" :key="cat.name">
+                        <div class="p-3 rounded-2xl glass-card border border-violet-500/20 flex flex-col gap-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-lg shrink-0" :style="'background-color: ' + cat.color"></span>
+                                    <span class="font-bold text-white" x-text="cat.name"></span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 font-medium" x-text="getCategoryStats(cat.name).completed + ' / ' + getCategoryStats(cat.name).total + ' Done'"></span>
+                                    <span class="px-2 py-0.5 rounded-full bg-violet-900/60 text-violet-200 text-[10px] font-bold" x-text="getCategoryStats(cat.name).percentage + '%'"></span>
+                                </div>
+                            </div>
+                            <!-- Category Mini Progress Bar -->
+                            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-500" :style="'width: ' + getCategoryStats(cat.name).percentage + '%; background-color: ' + cat.color"></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button @click="showAnalyticsModal = false" class="px-6 py-2.5 rounded-xl bg-violet-600 text-white font-bold text-xs hover:bg-violet-500 transition-all shadow-glow-sm">
+                    Close Hub
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function todoApp() {
+            return {
+                isDarkMode: true,
+                soundEnabled: true,
+                activeFilter: 'all',
+                selectedCategory: 'all', // 'all' or category name
+                viewMode: 'board', // 'board' (sections) or 'tab' (focused single list)
+                searchQuery: '',
+                sortBy: 'created',
+                showTimerModal: false,
+                showEditModal: false,
+                showAnalyticsModal: false,
+                editingTask: null,
+                greetingText: 'Stay inspired today',
+                toast: {
+                    show: false,
+                    message: ''
+                },
+
+                // Six Mandated Categories
+                categories: [
+                    { name: 'Daily Tasks', color: '#8b5cf6', icon: 'sun' },
+                    { name: 'Personal', color: '#ec4899', icon: 'user' },
+                    { name: 'Work', color: '#3b82f6', icon: 'briefcase' },
+                    { name: 'Finance', color: '#10b981', icon: 'wallet' },
+                    { name: 'Health', color: '#f43f5e', icon: 'heart-pulse' },
+                    { name: 'Study', color: '#f59e0b', icon: 'book-open' }
+                ],
+
+                newTask: {
+                    title: '',
+                    priority: 'medium',
+                    category: 'Daily Tasks',
+                    dueDate: ''
+                },
+
+                // Default seed tasks across categories
+                tasks: [
+                    { id: 1, title: 'Complete morning routine & review daily goals', completed: true, priority: 'high', category: 'Daily Tasks', dueDate: new Date().toISOString().split('T')[0], starred: true, createdAt: Date.now() - 3600000 },
+                    { id: 2, title: 'Review monthly budget and savings goal', completed: false, priority: 'high', category: 'Finance', dueDate: new Date().toISOString().split('T')[0], starred: true, createdAt: Date.now() - 5000000 },
+                    { id: 3, title: 'Read 2 chapters of system design architecture', completed: false, priority: 'medium', category: 'Study', dueDate: '', starred: false, createdAt: Date.now() - 7200000 },
+                    { id: 4, title: '30-minute workout and evening mindfulness', completed: false, priority: 'medium', category: 'Health', dueDate: new Date().toISOString().split('T')[0], starred: false, createdAt: Date.now() - 8000000 },
+                    { id: 5, title: 'Finalize violet UI component library for client project', completed: false, priority: 'high', category: 'Work', dueDate: new Date().toISOString().split('T')[0], starred: true, createdAt: Date.now() - 10000000 },
+                    { id: 6, title: 'Organize workspace & water house plants', completed: false, priority: 'low', category: 'Personal', dueDate: '', starred: false, createdAt: Date.now() - 12000000 }
+                ],
+
+                timer: {
+                    timeLeft: 1500,
+                    totalTime: 1500,
+                    running: false,
+                    interval: null,
+                    mode: 'work'
+                },
+
+                // Audio Context
+                audioCtx: null,
+                ambientAudio: {
+                    playing: false,
+                    node: null
+                },
+
+                init() {
+                    // Load dark mode preference
+                    const savedTheme = localStorage.getItem('aura_theme');
+                    if (savedTheme) {
+                        this.isDarkMode = savedTheme === 'dark';
+                    } else {
+                        this.isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    }
+
+                    // Load tasks from LocalStorage
+                    const savedTasks = localStorage.getItem('aura_tasks');
+                    if (savedTasks) {
+                        try {
+                            this.tasks = JSON.parse(savedTasks);
+                        } catch (e) {
+                            console.error('Failed to parse tasks', e);
+                        }
+                    }
+
+                    // Dynamic Greeting
+                    const hour = new Date().getHours();
+                    if (hour < 12) this.greetingText = 'Good morning, time to create ✨';
+                    else if (hour < 18) this.greetingText = 'Good afternoon, maintain your flow ✦';
+                    else this.greetingText = 'Good evening, reflect & relax 🌙';
+
+                    // Re-initialize Lucide Icons after render
+                    this.$nextTick(() => {
+                        if (window.lucide) window.lucide.createIcons();
+                    });
+
+                    this.$watch('tasks', () => {
+                        localStorage.setItem('aura_tasks', JSON.stringify(this.tasks));
+                        this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+                    });
+
+                    this.$watch('isDarkMode', (val) => {
+                        localStorage.setItem('aura_theme', val ? 'dark' : 'light');
+                    });
+                },
+
+                showNotification(msg) {
+                    this.toast.message = msg;
+                    this.toast.show = true;
+                    setTimeout(() => {
+                        this.toast.show = false;
+                    }, 4000);
+                },
+
+                toggleTheme() {
+                    this.isDarkMode = !this.isDarkMode;
+                },
+
+                toggleSound() {
+                    this.soundEnabled = !this.soundEnabled;
+                },
+
+                get activeFilterTitle() {
+                    if (this.selectedCategory !== 'all') return `${this.selectedCategory} Section`;
+                    if (this.activeFilter === 'today') return "Today's Focus";
+                    if (this.activeFilter === 'starred') return "Starred Tasks";
+                    if (this.activeFilter === 'completed') return "Completed Tasks";
+                    return "Categorized Task Board";
+                },
+
+                getCategoryIcon(catName) {
+                    const icons = {
+                        'Daily Tasks': 'sun',
+                        'Personal': 'user',
+                        'Work': 'briefcase',
+                        'Finance': 'wallet',
+                        'Health': 'heart-pulse',
+                        'Study': 'book-open'
+                    };
+                    return icons[catName] || 'folder';
+                },
+
+                getCategorySubtitle(catName) {
+                    const subs = {
+                        'Daily Tasks': 'Habits & everyday priorities',
+                        'Personal': 'Self-care & lifestyle activities',
+                        'Work': 'Projects, meetings & deliverables',
+                        'Finance': 'Budgets, bills & investments',
+                        'Health': 'Fitness, nutrition & wellness',
+                        'Study': 'Learning, courses & research'
+                    };
+                    return subs[catName] || 'Category tasks';
+                },
+
+                getTasksByCategory(catName) {
+                    let result = this.tasks.filter(t => t.category === catName);
+
+                    if (this.searchQuery.trim() !== '') {
+                        const q = this.searchQuery.toLowerCase();
+                        result = result.filter(t => t.title.toLowerCase().includes(q));
+                    }
+
+                    if (this.activeFilter === 'today') {
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        result = result.filter(t => t.dueDate === todayStr);
+                    } else if (this.activeFilter === 'starred') {
+                        result = result.filter(t => t.starred);
+                    } else if (this.activeFilter === 'completed') {
+                        result = result.filter(t => t.completed);
+                    }
+
+                    return result.sort((a, b) => b.createdAt - a.createdAt);
+                },
+
+                get filteredTasks() {
+                    let result = this.tasks.filter(task => {
+                        if (this.selectedCategory !== 'all' && task.category !== this.selectedCategory) return false;
+                        
+                        if (this.activeFilter === 'today') {
+                            const todayStr = new Date().toISOString().split('T')[0];
+                            if (task.dueDate !== todayStr) return false;
+                        } else if (this.activeFilter === 'starred') {
+                            if (!task.starred) return false;
+                        } else if (this.activeFilter === 'completed') {
+                            if (!task.completed) return false;
+                        }
+
+                        if (this.searchQuery.trim() !== '') {
+                            const q = this.searchQuery.toLowerCase();
+                            const matchesTitle = task.title.toLowerCase().includes(q);
+                            const matchesCategory = task.category.toLowerCase().includes(q);
+                            if (!matchesTitle && !matchesCategory) return false;
+                        }
+
+                        return true;
+                    });
+
+                    return result.sort((a, b) => {
+                        if (this.sortBy === 'priority') {
+                            const pMap = { high: 1, medium: 2, low: 3 };
+                            return pMap[a.priority] - pMap[b.priority];
+                        } else if (this.sortBy === 'dueDate') {
+                            if (!a.dueDate) return 1;
+                            if (!b.dueDate) return -1;
+                            return new Date(a.dueDate) - new Date(b.dueDate);
+                        } else if (this.sortBy === 'alphabetical') {
+                            return a.title.localeCompare(b.title);
+                        } else {
+                            return b.createdAt - a.createdAt;
+                        }
+                    });
+                },
+
+                get totalTasksCount() { return this.tasks.length; },
+                get completedCount() { return this.tasks.filter(t => t.completed).length; },
+                get pendingCount() { return this.tasks.length - this.completedCount; },
+                get completionPercentage() {
+                    if (this.tasks.length === 0) return 0;
+                    return Math.round((this.completedCount / this.tasks.length) * 100);
+                },
+                get pendingPercentage() {
+                    if (this.tasks.length === 0) return 0;
+                    return 100 - this.completionPercentage;
+                },
+                get highPriorityPendingCount() {
+                    return this.tasks.filter(t => !t.completed && t.priority === 'high').length;
+                },
+                get productivityRank() {
+                    const pct = this.completionPercentage;
+                    if (pct === 100 && this.tasks.length > 0) return "Zen Master 🏆";
+                    if (pct >= 80) return "Flow Specialist ⚡";
+                    if (pct >= 50) return "Momentum Builder 🔥";
+                    if (pct > 0) return "Focus Starter 🌱";
+                    return "Awaiting Spark ✦";
+                },
+
+                getCategoryStats(catName) {
+                    const catTasks = this.tasks.filter(t => t.category === catName);
+                    const total = catTasks.length;
+                    const completed = catTasks.filter(t => t.completed).length;
+                    const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+                    return { total, completed, percentage };
+                },
+
+                get todayCount() {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    return this.tasks.filter(t => t.dueDate === todayStr).length;
+                },
+                get starredCount() { return this.tasks.filter(t => t.starred).length; },
+
+                getCategoryCount(catName) {
+                    return this.tasks.filter(t => t.category === catName).length;
+                },
+
+                getCategoryColor(catName) {
+                    const found = this.categories.find(c => c.name === catName);
+                    return found ? found.color : '#8b5cf6';
+                },
+
+                getPriorityColor(priority) {
+                    if (priority === 'high') return 'bg-rose-500';
+                    if (priority === 'medium') return 'bg-amber-500';
+                    return 'bg-emerald-500';
+                },
+
+                getMotivationQuote() {
+                    const pct = this.completionPercentage;
+                    if (pct === 100 && this.tasks.length > 0) return "Masterclass performance today!";
+                    if (pct >= 75) return "Almost at perfection. Keep pushing!";
+                    if (pct >= 50) return "Over halfway there. Great rhythm!";
+                    if (pct > 0) return "Good momentum built!";
+                    return "Ready to kickstart productivity!";
+                },
+
+                addTask() {
+                    if (!this.newTask.title.trim()) return;
+
+                    const newId = Date.now();
+                    this.tasks.unshift({
+                        id: newId,
+                        title: this.newTask.title.trim(),
+                        completed: false,
+                        priority: this.newTask.priority,
+                        category: this.newTask.category,
+                        dueDate: this.newTask.dueDate,
+                        starred: false,
+                        createdAt: newId
+                    });
+
+                    this.newTask.title = '';
+                    this.newTask.dueDate = '';
+                    this.playAudioPop();
+                    this.showNotification("New task added to " + this.newTask.category);
+                },
+
+                toggleTaskCompletion(task, event) {
+                    task.completed = event.target.checked;
+                    if (task.completed) {
+                        this.playAudioChime();
+                        this.triggerConfetti();
+                    } else {
+                        this.playAudioPop();
+                    }
+                },
+
+                toggleStar(task) {
+                    task.starred = !task.starred;
+                    this.playAudioPop();
+                },
+
+                deleteTask(id) {
+                    this.tasks = this.tasks.filter(t => t.id !== id);
+                    this.playAudioPop();
+                },
+
+                clearCompletedTasks() {
+                    this.tasks = this.tasks.filter(t => !t.completed);
+                    this.playAudioPop();
+                    this.showNotification("Cleared all completed tasks.");
+                },
+
+                promptNewCategory() {
+                    const catName = prompt("Enter new category name:");
+                    if (catName && catName.trim()) {
+                        const colors = ['#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#06b6d4'];
+                        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                        this.categories.push({ name: catName.trim(), color: randomColor, icon: 'folder' });
+                        this.showNotification("Category '" + catName.trim() + "' created.");
+                    }
+                },
+
+                openEditModal(task) {
+                    this.editingTask = JSON.parse(JSON.stringify(task));
+                    this.showEditModal = true;
+                },
+
+                saveEditedTask() {
+                    const index = this.tasks.findIndex(t => t.id === this.editingTask.id);
+                    if (index !== -1) {
+                        this.tasks[index] = { ...this.editingTask };
+                    }
+                    this.showEditModal = false;
+                    this.playAudioPop();
+                    this.showNotification("Task updated successfully.");
+                },
+
+                formatDueDate(dateStr) {
+                    if (!dateStr) return '';
+                    const today = new Date().toISOString().split('T')[0];
+                    if (dateStr === today) return 'Today';
+                    
+                    const d = new Date(dateStr + 'T00:00:00');
+                    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                },
+
+                isOverdue(dateStr) {
+                    if (!dateStr) return false;
+                    const today = new Date().toISOString().split('T')[0];
+                    return dateStr < today;
+                },
+
+                get timerPercentage() {
+                    return Math.round((this.timer.timeLeft / this.timer.totalTime) * 100);
+                },
+
+                setTimerMode(mode) {
+                    this.timer.mode = mode;
+                    this.timer.running = false;
+                    clearInterval(this.timer.interval);
+                    if (mode === 'work') {
+                        this.timer.timeLeft = 1500; // 25 mins
+                        this.timer.totalTime = 1500;
+                    } else {
+                        this.timer.timeLeft = 300; // 5 mins
+                        this.timer.totalTime = 300;
+                    }
+                },
+
+                toggleTimer() {
+                    if (this.timer.running) {
+                        clearInterval(this.timer.interval);
+                        this.timer.running = false;
+                    } else {
+                        this.timer.running = true;
+                        this.timer.interval = setInterval(() => {
+                            if (this.timer.timeLeft > 0) {
+                                this.timer.timeLeft--;
+                            } else {
+                                clearInterval(this.timer.interval);
+                                this.timer.running = false;
+                                this.playAudioChime();
+                                this.showNotification(`Pomodoro ${this.timer.mode === 'work' ? 'focus session' : 'break'} completed!`);
+                            }
+                        }, 1000);
+                    }
+                },
+
+                resetTimer() {
+                    this.setTimerMode(this.timer.mode);
+                },
+
+                formatTime(seconds) {
+                    const m = Math.floor(seconds / 60);
+                    const s = seconds % 60;
+                    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                },
+
+                initAudio() {
+                    if (!this.audioCtx) {
+                        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                },
+
+                playAudioPop() {
+                    if (!this.soundEnabled) return;
+                    this.initAudio();
+                    const osc = this.audioCtx.createOscillator();
+                    const gain = this.audioCtx.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, this.audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, this.audioCtx.currentTime + 0.05);
+
+                    gain.gain.setValueAtTime(0.1, this.audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.05);
+
+                    osc.connect(gain);
+                    gain.connect(this.audioCtx.destination);
+
+                    osc.start();
+                    osc.stop(this.audioCtx.currentTime + 0.05);
+                },
+
+                playAudioChime() {
+                    if (!this.soundEnabled) return;
+                    this.initAudio();
+                    
+                    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 major triad
+                    notes.forEach((freq, idx) => {
+                        const osc = this.audioCtx.createOscillator();
+                        const gain = this.audioCtx.createGain();
+
+                        osc.type = 'triangle';
+                        osc.frequency.value = freq;
+
+                        const startTime = this.audioCtx.currentTime + (idx * 0.08);
+                        gain.gain.setValueAtTime(0.12, startTime);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.6);
+
+                        osc.connect(gain);
+                        gain.connect(this.audioCtx.destination);
+
+                        osc.start(startTime);
+                        osc.stop(startTime + 0.6);
+                    });
+                },
+
+                toggleAmbientSound() {
+                    this.initAudio();
+                    if (this.ambientAudio.playing) {
+                        if (this.ambientAudio.node) this.ambientAudio.node.stop();
+                        this.ambientAudio.playing = false;
+                    } else {
+                        // Generate soft Pink Noise stream
+                        const bufferSize = this.audioCtx.sampleRate * 2;
+                        const buffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+                        const output = buffer.getChannelData(0);
+                        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+
+                        for (let i = 0; i < bufferSize; i++) {
+                            let white = Math.random() * 2 - 1;
+                            b0 = 0.99886 * b0 + white * 0.0555179;
+                            b1 = 0.99332 * b1 + white * 0.0750759;
+                            b2 = 0.96900 * b2 + white * 0.1538520;
+                            b3 = 0.86650 * b3 + white * 0.3104856;
+                            b4 = 0.55000 * b4 + white * 0.5329522;
+                            b5 = -0.7616 * b5 - white * 0.0168980;
+                            output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                            output[i] *= 0.015; // Soft ambient volume
+                            b6 = white * 0.115926;
+                        }
+
+                        const whiteNoise = this.audioCtx.createBufferSource();
+                        whiteNoise.buffer = buffer;
+                        whiteNoise.loop = true;
+                        whiteNoise.connect(this.audioCtx.destination);
+                        whiteNoise.start();
+
+                        this.ambientAudio.node = whiteNoise;
+                        this.ambientAudio.playing = true;
+                    }
+                },
+
+                triggerConfetti() {
+                    const canvas = document.getElementById('confettiCanvas');
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+
+                    const particles = [];
+                    const colors = ['#7c3aed', '#a78bfa', '#c4b5fd', '#ec4899', '#f472b6', '#ef4444', '#fbbf24'];
+
+                    for (let i = 0; i < 45; i++) {
+                        particles.push({
+                            x: canvas.width / 2,
+                            y: canvas.height / 2,
+                            vx: (Math.random() - 0.5) * 14,
+                            vy: (Math.random() - 0.8) * 14,
+                            size: Math.random() * 7 + 4,
+                            color: colors[Math.floor(Math.random() * colors.length)],
+                            alpha: 1,
+                            decay: Math.random() * 0.02 + 0.015
+                        });
+                    }
+
+                    function animateConfetti() {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        let alive = false;
+
+                        particles.forEach(p => {
+                            if (p.alpha > 0) {
+                                alive = true;
+                                p.x += p.vx;
+                                p.y += p.vy;
+                                p.vy += 0.25; // gravity
+                                p.alpha -= p.decay;
+
+                                ctx.save();
+                                ctx.globalAlpha = Math.max(0, p.alpha);
+                                ctx.fillStyle = p.color;
+                                ctx.beginPath();
+                                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                                ctx.fill();
+                                ctx.restore();
+                            }
+                        });
+
+                        if (alive) {
+                            requestAnimationFrame(animateConfetti);
+                        }
+                    }
+
+                    animateConfetti();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
