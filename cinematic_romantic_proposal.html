@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Promise of Forever</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        velvet: '#2A0813',
+                        deepRose: '#4A0E17',
+                        crimsonGlow: '#8B0032',
+                        blush: '#FF6B8B',
+                        champagne: '#F3E5AB',
+                        gold: '#D4AF37',
+                        goldHover: '#AA820A',
+                        darkObsidian: '#0A0608',
+                        neonPink: '#FF1493',
+                        electricGold: '#FFD700'
+                    },
+                    fontFamily: {
+                        cinzel: ['Cinzel', 'serif'],
+                        cursive: ['"Great Vibes"', 'cursive'],
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['"Courier New"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Great+Vibes&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #0A0608;
+            color: #F3E5AB;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0608;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4A0E17;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8B0032;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(20, 10, 15, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-6px) scale(1.01);
+            border-color: rgba(212, 175, 55, 0.5);
+            box-shadow: 0 12px 40px 0 rgba(212, 175, 55, 0.15);
+        }
+
+        /* Glowing Text Effects */
+        .text-glow {
+            text-shadow: 0 0 15px rgba(255, 107, 139, 0.6), 0 0 30px rgba(212, 175, 55, 0.4);
+        }
+        .text-gold-glow {
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.7);
+        }
+        .text-neon-glow {
+            text-shadow: 0 0 12px rgba(255, 20, 147, 0.8), 0 0 25px rgba(255, 107, 139, 0.5);
+        }
+
+        /* Wax Seal Styling */
+        .wax-seal {
+            background: radial-gradient(circle at 30% 30%, #a81c37, #5c0818);
+            box-shadow: inset -2px -2px 6px rgba(0, 0, 0, 0.6), 0 6px 15px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .wax-seal:hover {
+            transform: scale(1.08) rotate(3deg);
+            box-shadow: inset -2px -2px 6px rgba(0, 0, 0, 0.6), 0 10px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        /* SUSPICIOUS BUTTON SPECIAL EFFECTS */
+        .suspicious-btn-danger {
+            background: linear-gradient(135deg, #4A0E17 0%, #8B0032 50%, #2A0813 100%);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4), inset 0 0 15px rgba(255, 0, 0, 0.3);
+            border: 1.5px solid rgba(239, 68, 68, 0.6);
+            animation: dangerPulse 2s infinite ease-in-out;
+        }
+        @keyframes dangerPulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.6); }
+            50% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.8), 0 0 10px rgba(255, 107, 139, 0.8); border-color: rgba(255, 107, 139, 1); }
+        }
+
+        .suspicious-btn-scanner {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            border: 1.5px solid rgba(0, 242, 254, 0.5);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+        }
+
+        .suspicious-btn-gift {
+            background: linear-gradient(135deg, #3a1c71 0%, #d76d77 50%, #ffaf7b 100%);
+            border: 1.5px solid rgba(212, 175, 55, 0.6);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .suspicious-btn-cosmic {
+            background: linear-gradient(135deg, #11002c 0%, #3e005e 50%, #800080 100%);
+            border: 1.5px solid rgba(192, 132, 252, 0.6);
+            box-shadow: 0 0 20px rgba(192, 132, 252, 0.4);
+        }
+
+        /* Pulse Animation for Heartbeat */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: floatSlow 5s ease-in-out infinite;
+        }
+
+        @keyframes wiggleSlow {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+        .animate-wiggle {
+            animation: wiggleSlow 1.5s ease-in-out infinite;
+        }
+
+        /* Parchment background for personal letter */
+        .parchment {
+            background: radial-gradient(#2b161b, #15090d);
+            border: 2px solid #D4AF37;
+        }
+
+        /* Laser Scan Line */
+        @keyframes scanMove {
+            0% { top: 0%; opacity: 0.8; }
+            50% { top: 100%; opacity: 1; }
+            100% { top: 0%; opacity: 0.8; }
+        }
+        .laser-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #00f2fe, #ff1493, transparent);
+            box-shadow: 0 0 15px #00f2fe, 0 0 25px #ff1493;
+            animation: scanMove 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen text-champagne selection:bg-crimsonGlow selection:text-gold">
+
+    <!-- Background Canvas for Ambient Floating Hearts, Sparkles & Auroras -->
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-80"></canvas>
+
+    <!-- Floating Quick-Suspicious Button on Left -->
+    <div class="fixed bottom-6 left-6 z-40">
+        <button onclick="triggerQuickSuspiciousModal()" class="group relative flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-crimsonGlow via-deepRose to-velvet border-2 border-gold/60 text-gold shadow-2xl hover:scale-110 transition-all duration-300 animate-wiggle">
+            <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blush opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-gold"></span>
+            </span>
+            <i data-lucide="help-circle" class="w-5 h-5 text-gold group-hover:rotate-12 transition-transform"></i>
+            <span class="font-cinzel text-xs font-bold tracking-widest uppercase pr-1 text-champagne">Suspicious Secret!</span>
+        </button>
+    </div>
+
+    <!-- Floating Top Bar / Controls -->
+    <div class="fixed top-5 right-5 z-50 flex items-center gap-3">
+        <!-- Audio Synth Ambient Toggle -->
+        <button id="musicToggleBtn" onclick="toggleAudio()" class="glass-card p-3 rounded-full hover:border-gold transition-all duration-300 group flex items-center justify-center text-champagne hover:text-gold shadow-lg" title="Toggle Ambient Audio">
+            <i data-lucide="music" id="musicIcon" class="w-5 h-5"></i>
+            <span id="musicStatus" class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out whitespace-nowrap text-xs ml-0 group-hover:ml-2 opacity-0 group-hover:opacity-100">Play Music</span>
+        </button>
+
+        <!-- Customizer Drawer Toggle -->
+        <button onclick="openCustomizer()" class="glass-card p-3 rounded-full hover:border-gold transition-all duration-300 group flex items-center justify-center text-champagne hover:text-gold shadow-lg" title="Personalize Story">
+            <i data-lucide="settings" class="w-5 h-5 transition-transform duration-500 group-hover:rotate-90"></i>
+            <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out whitespace-nowrap text-xs ml-0 group-hover:ml-2 opacity-0 group-hover:opacity-100">Customize</span>
+        </button>
+    </div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-28">
+
+        <!-- HERO SECTION -->
+        <section id="hero" class="min-h-[85vh] flex flex-col items-center justify-center text-center pt-10">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-xs tracking-widest text-gold uppercase mb-6 animate-pulse-glow">
+                <i data-lucide="sparkles" class="w-4 h-4 text-blush"></i>
+                <span>Our Cinematic Story</span>
+                <i data-lucide="sparkles" class="w-4 h-4 text-blush"></i>
+            </div>
+
+            <h1 class="font-cinzel text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+                Every Love Story is Beautiful,<br>
+                <span class="bg-gradient-to-r from-gold via-blush to-champagne bg-clip-text text-transparent text-glow inline-block mt-2">
+                    But Ours is My Favorite.
+                </span>
+            </h1>
+
+            <p id="heroSubtext" class="text-base sm:text-xl text-champagne/80 max-w-2xl font-light mb-10 leading-relaxed">
+                Dedicated to <span id="partnerNameDisplay" class="font-semibold text-gold border-b border-gold/40 pb-0.5">My Dearest Love</span> — a journey through every quiet glance, shared smile, and unforgettable memory we've woven together.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 items-center justify-center w-full max-w-md">
+                <a href="#chapters" class="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-deepRose to-crimsonGlow hover:from-crimsonGlow hover:to-deepRose text-white font-cinzel tracking-wider text-sm font-bold shadow-lg hover:shadow-blush/30 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 group border border-gold/30">
+                    <span>Begin The Journey</span>
+                    <i data-lucide="arrow-down" class="w-4 h-4 group-hover:translate-y-1 transition-transform"></i>
+                </a>
+                <a href="#suspiciousVault" class="w-full sm:w-auto px-8 py-4 rounded-full glass-card hover:bg-gold/10 text-champagne font-cinzel tracking-wider text-sm font-semibold transition-all duration-300 border border-gold/30 flex items-center justify-center gap-2">
+                    <i data-lucide="shield-alert" class="w-4 h-4 text-gold"></i>
+                    <span>Suspicious Secrets</span>
+                </a>
+            </div>
+
+            <div class="mt-16 animate-bounce">
+                <i data-lucide="chevron-down" class="w-6 h-6 text-gold/60"></i>
+            </div>
+        </section>
+
+        <!-- LOVE STORY CHAPTERS SECTION -->
+        <section id="chapters" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <p class="font-cursive text-3xl sm:text-4xl text-blush">Chapter by Chapter</p>
+                <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-white tracking-wide mt-1">
+                    The Milestones of Us
+                </h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mt-4"></div>
+            </div>
+
+            <!-- Chapter Switcher Buttons -->
+            <div id="chapterTabs" class="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8">
+                <!-- Tabs rendered via JS -->
+            </div>
+
+            <!-- Chapter Content Card -->
+            <div id="chapterCard" class="glass-card rounded-3xl p-6 sm:p-10 relative overflow-hidden transition-all duration-500 min-h-[320px] flex flex-col justify-between">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-blush/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-10 -top-10 w-40 h-40 bg-gold/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-6 border-b border-gold/15 pb-4">
+                        <span id="chapterNumber" class="font-cinzel text-xs tracking-widest text-gold uppercase px-3 py-1 rounded-full bg-gold/10 border border-gold/20">
+                            Chapter I
+                        </span>
+                        <div id="chapterDate" class="text-xs text-champagne/60 font-mono flex items-center gap-1">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-blush"></i>
+                            <span>First Spark</span>
+                        </div>
+                    </div>
+
+                    <h3 id="chapterTitle" class="font-cinzel text-2xl sm:text-3xl font-bold text-white mb-4">
+                        The Moment Our Worlds Collided
+                    </h3>
+
+                    <p id="chapterBody" class="text-champagne/90 text-base sm:text-lg font-light leading-relaxed mb-6">
+                        It started with a simple hello, but in that single second, the universe quieted down. Every detail of that day remains etched into memory — the way the lighting caught your eyes, the spontaneous laughter, and the subtle realization that something extraordinary was unfolding.
+                    </p>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-gold/10 mt-6">
+                    <button id="prevChapterBtn" onclick="prevChapter()" class="px-4 py-2 rounded-xl text-xs font-cinzel text-champagne/70 hover:text-gold hover:bg-gold/10 transition-all flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i> Previous
+                    </button>
+                    <div class="flex gap-1.5" id="chapterDots">
+                        <!-- Dots rendered by JS -->
+                    </div>
+                    <button id="nextChapterBtn" onclick="nextChapter()" class="px-4 py-2 rounded-xl text-xs font-cinzel text-gold hover:bg-gold/10 transition-all flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none">
+                        Next <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MEMORY TIMELINE SECTION -->
+        <section id="timeline" class="scroll-mt-20">
+            <div class="text-center mb-16">
+                <p class="font-cursive text-3xl sm:text-4xl text-blush">Captured Moments</p>
+                <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-white tracking-wide mt-1">
+                    Our Memory Gallery
+                </h2>
+                <p class="text-xs text-champagne/60 mt-2">Click any memory to enlarge & relive the moment</p>
+                <div class="w-24 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mt-4"></div>
+            </div>
+
+            <!-- Vertical Timeline Line -->
+            <div class="relative border-l-2 border-gold/30 ml-4 sm:ml-32 space-y-12">
+                <!-- Memories container rendered by JS -->
+                <div id="timelineContainer"></div>
+            </div>
+        </section>
+
+        <!-- NEW SECTION: THE VAULT OF SUSPICIOUS SECRETS -->
+        <section id="suspiciousVault" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/60 border border-red-500/40 text-red-400 font-mono text-xs uppercase tracking-widest mb-3">
+                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                    <span>TOP SECRET • CLASSIFIED ARCHIVES</span>
+                </div>
+                <h2 class="font-cinzel text-3xl sm:text-5xl font-black text-white tracking-wide">
+                    The Vault of Suspicious Secrets
+                </h2>
+                <p class="text-champagne/70 text-sm max-w-xl mx-auto mt-2 font-light">
+                    Proceed with caution! These interactive buttons contain high levels of romantic curiosity, secret missions, and unexpected surprises.
+                </p>
+                <div class="w-32 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent mx-auto mt-4"></div>
+            </div>
+
+            <!-- GRID OF SUSPICIOUS BUTTONS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- SUSPICIOUS BUTTON 1: DO NOT PRESS -->
+                <div class="suspicious-btn-danger rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+                    <div class="absolute top-3 right-3 text-[10px] font-mono px-2 py-0.5 rounded bg-red-900/80 text-red-200 border border-red-500/50 uppercase tracking-widest">
+                        [ DANGER LEVEL: 100% ]
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400">
+                            <i data-lucide="skull" class="w-6 h-6 animate-bounce"></i>
+                        </div>
+                        <h3 class="font-cinzel text-2xl font-bold text-white tracking-wide">
+                            WARNING: DO NOT PRESS
+                        </h3>
+                        <p class="text-xs text-champagne/80 font-light leading-relaxed">
+                            Strictly prohibited button! System override will initiate romantic overload and unseal classified confessions.
+                        </p>
+                    </div>
+
+                    <button onclick="pressForbiddenButton()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-red-600 via-crimsonGlow to-red-600 hover:from-red-500 hover:to-crimsonGlow text-white font-cinzel font-black text-sm uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 group transition-all">
+                        <i data-lucide="lock" class="w-4 h-4 text-gold group-hover:rotate-45 transition-transform"></i>
+                        <span>OVERRIDE SECURITY & PRESS</span>
+                    </button>
+                </div>
+
+
+                <!-- SUSPICIOUS BUTTON 2: BIOMETRIC HEART SCANNER -->
+                <div class="suspicious-btn-scanner rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+                    <div class="absolute top-3 right-3 text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-500/50 uppercase tracking-widest">
+                        [ LIE DETECTOR ]
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
+                            <i data-lucide="fingerprint" class="w-6 h-6 animate-pulse"></i>
+                        </div>
+                        <h3 class="font-cinzel text-2xl font-bold text-white tracking-wide">
+                            Biometric Heart Scanner
+                        </h3>
+                        <p class="text-xs text-champagne/80 font-light leading-relaxed">
+                            Place and hold your cursor/finger on the scanner button below to measure exact romantic compatibility!
+                        </p>
+                    </div>
+
+                    <div class="relative">
+                        <button id="scannerBtn" onmousedown="startHeartScan()" onmouseup="stopHeartScan()" onmouseleave="stopHeartScan()" ontouchstart="startHeartScan()" ontouchend="stopHeartScan()" class="w-full py-4 rounded-2xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/50 text-cyan-200 font-cinzel font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all relative overflow-hidden">
+                            <div id="scanLaser" class="laser-line hidden"></div>
+                            <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+                            <span id="scanBtnText">HOLD TO SCAN HEART RATE</span>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- SUSPICIOUS BUTTON 3: CLASSIFIED MYSTERY GIFT -->
+                <div class="suspicious-btn-gift rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+                    <div class="absolute top-3 right-3 text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-500/50 uppercase tracking-widest">
+                        [ REWARD COUPOUN ]
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300">
+                            <i data-lucide="gift" class="w-6 h-6 animate-bounce"></i>
+                        </div>
+                        <h3 class="font-cinzel text-2xl font-bold text-white tracking-wide">
+                            Classified Mystery Box
+                        </h3>
+                        <p class="text-xs text-champagne/80 font-light leading-relaxed">
+                            Unlock a surprise romantic promise, secret date voucher, or sweet mini-quest card!
+                        </p>
+                    </div>
+
+                    <button onclick="revealMysteryGift()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-gold via-champagne to-gold hover:from-champagne hover:to-gold text-darkObsidian font-cinzel font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 transition-all">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-crimsonGlow"></i>
+                        <span>UNWRAP SUSPICIOUS GIFT</span>
+                    </button>
+                </div>
+
+
+                <!-- SUSPICIOUS BUTTON 4: PROJECT CELESTIAL AURORA -->
+                <div class="suspicious-btn-cosmic rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+                    <div class="absolute top-3 right-3 text-[10px] font-mono px-2 py-0.5 rounded bg-pink-950/80 text-pink-300 border border-pink-500/50 uppercase tracking-widest">
+                        [ VISUAL OVERDRIVE ]
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-300">
+                            <i data-lucide="wand-2" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-cinzel text-2xl font-bold text-white tracking-wide">
+                            Celestial Aurora Burst
+                        </h3>
+                        <p class="text-xs text-champagne/80 font-light leading-relaxed">
+                            Instantly ignite the ambient sky with a galaxy of golden stars and shooting romantic cosmic rays.
+                        </p>
+                    </div>
+
+                    <button onclick="triggerCosmicAurora()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white font-cinzel font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 transition-all">
+                        <i data-lucide="stars" class="w-4 h-4 text-gold"></i>
+                        <span>IGNITE COSMIC AURORA</span>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- MYSTERY SECTION: ARE YOU READY? -->
+        <section id="mystery" class="scroll-mt-20">
+            <div class="glass-card rounded-3xl p-8 sm:p-14 text-center relative overflow-hidden border-2 border-gold/40 shadow-2xl">
+                <div class="absolute inset-0 bg-gradient-to-b from-velvet/80 via-darkObsidian to-velvet/90 pointer-events-none"></div>
+
+                <div class="relative z-10 max-w-2xl mx-auto space-y-6">
+                    <div class="w-16 h-16 rounded-full bg-gold/10 border border-gold/40 flex items-center justify-center mx-auto text-gold mb-2 animate-pulse-glow">
+                        <i data-lucide="key" class="w-8 h-8"></i>
+                    </div>
+
+                    <p class="font-cursive text-3xl text-blush">A Moment of Truth</p>
+
+                    <h2 class="font-cinzel text-3xl sm:text-5xl font-extrabold text-white tracking-wider">
+                        Are You Ready?
+                    </h2>
+
+                    <p class="text-champagne/80 text-sm sm:text-base leading-relaxed font-light">
+                        We have walked through our past, cherished our present, and now stands a door to our tomorrow. Behind this key lies a question that has been burning in my heart.
+                    </p>
+
+                    <!-- Lock / Countdown Ring Container -->
+                    <div id="mysteryLockBox" class="py-6">
+                        <button id="readyBtn" onclick="triggerCountdownSequence()" class="relative inline-flex items-center justify-center px-10 py-5 rounded-full bg-gradient-to-r from-gold via-champagne to-gold hover:from-champagne hover:to-gold text-darkObsidian font-cinzel font-bold text-base tracking-widest uppercase shadow-xl hover:shadow-gold/50 transition-all duration-300 transform hover:scale-105 group">
+                            <i data-lucide="heart" class="w-5 h-5 mr-2 text-crimsonGlow fill-crimsonGlow group-hover:scale-125 transition-transform"></i>
+                            <span>I Am Ready, My Love</span>
+                        </button>
+                    </div>
+
+                    <!-- Countdown Display (hidden initially) -->
+                    <div id="countdownBox" class="hidden py-4">
+                        <p class="text-xs uppercase tracking-widest text-gold mb-2">Unlocking Final Question in...</p>
+                        <div id="countdownNum" class="font-cinzel text-7xl font-extrabold text-white text-glow animate-ping-once">
+                            3
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+
+    <!-- FORBIDDEN BUTTON POPUP MODAL -->
+    <div id="forbiddenModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl hidden flex items-center justify-center p-4">
+        <div class="relative w-full max-w-lg glass-card rounded-3xl p-8 text-center border-2 border-red-500/80 shadow-2xl space-y-6 animate-bounce-slow">
+            <div class="w-20 h-20 rounded-full bg-red-600/20 border-2 border-red-500 flex items-center justify-center mx-auto text-red-500 animate-ping-once">
+                <i data-lucide="shield-alert" class="w-10 h-10"></i>
+            </div>
+            <div class="space-y-2">
+                <span class="text-[10px] font-mono bg-red-950 text-red-400 px-3 py-1 rounded-full border border-red-500/40 uppercase tracking-widest">
+                    SYSTEM BREACH DETECTED!
+                </span>
+                <h3 class="font-cinzel text-3xl font-black text-white">
+                    UNAUTHORIZED LOVE OVERLOAD
+                </h3>
+            </div>
+            <p class="text-champagne/90 text-sm font-light leading-relaxed">
+                You pressed the forbidden button! System analysis reveals you are 100% guilty of stealing my heart, brightening every day, and looking dangerously gorgeous!
+            </p>
+            <div class="pt-4">
+                <button onclick="closeForbiddenModal()" class="px-8 py-3 rounded-full bg-gradient-to-r from-red-600 to-crimsonGlow text-white font-cinzel text-xs font-bold uppercase tracking-widest shadow-lg hover:scale-105 transition-transform">
+                    Accept Sentence (Endless Hugs)
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- SCAN RESULT MODAL -->
+    <div id="scanModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl hidden flex items-center justify-center p-4">
+        <div class="relative w-full max-w-lg glass-card rounded-3xl p-8 text-center border-2 border-cyan-500/80 shadow-2xl space-y-6">
+            <div class="w-20 h-20 rounded-full bg-cyan-600/20 border-2 border-cyan-400 flex items-center justify-center mx-auto text-cyan-300">
+                <i data-lucide="check-circle-2" class="w-10 h-10 animate-pulse"></i>
+            </div>
+            <div>
+                <span class="text-[10px] font-mono bg-cyan-950 text-cyan-300 px-3 py-1 rounded-full border border-cyan-500/40 uppercase tracking-widest">
+                    SCAN COMPLETE
+                </span>
+                <h3 class="font-cinzel text-3xl font-black text-white mt-2">
+                    Score: 10,000% Soulmate Match!
+                </h3>
+            </div>
+            <p class="text-champagne/90 text-sm font-light leading-relaxed">
+                The scanner broke! The readings show maximum love levels, infinite chemistry, and zero chance of me ever letting you go.
+            </p>
+            <button onclick="closeScanModal()" class="px-8 py-3 rounded-full bg-cyan-500 text-black font-cinzel text-xs font-bold uppercase tracking-widest shadow-lg hover:scale-105 transition-transform">
+                Awesome!
+            </button>
+        </div>
+    </div>
+
+
+    <!-- MYSTERY GIFT MODAL -->
+    <div id="giftModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl hidden flex items-center justify-center p-4">
+        <div class="relative w-full max-w-md glass-card rounded-3xl p-8 text-center border-2 border-gold/60 shadow-2xl space-y-6">
+            <div class="w-16 h-16 rounded-full bg-gold/20 border border-gold flex items-center justify-center mx-auto text-gold">
+                <i data-lucide="ticket" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <span class="text-[10px] font-mono bg-gold/10 text-gold px-3 py-1 rounded-full border border-gold/30 uppercase tracking-widest">
+                    UNLOCKED VOUCHER
+                </span>
+                <h3 id="giftTitle" class="font-cinzel text-2xl font-bold text-white mt-2">
+                    Romantic Gift Unlocked
+                </h3>
+            </div>
+            <div id="giftContent" class="p-4 rounded-2xl bg-velvet/80 border border-gold/30 text-champagne text-sm font-light italic leading-relaxed">
+                "One free midnight stargazing drive + warm hugs on demand."
+            </div>
+            <button onclick="closeGiftModal()" class="px-8 py-3 rounded-full bg-gold text-darkObsidian font-cinzel text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform">
+                Claim Reward
+            </button>
+        </div>
+    </div>
+
+
+    <!-- PROPOSAL POPUP MODAL -->
+    <div id="proposalModal" class="fixed inset-0 z-50 bg-darkObsidian/95 backdrop-blur-2xl hidden flex items-center justify-center p-4 transition-all duration-500">
+        <div class="relative w-full max-w-2xl glass-card rounded-3xl p-8 sm:p-12 text-center border-2 border-gold/60 shadow-2xl overflow-hidden animate-float">
+            <div class="relative z-10 space-y-6">
+                <!-- Floating Ring Icon -->
+                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-gold to-champagne p-0.5 mx-auto shadow-lg shadow-gold/30">
+                    <div class="w-full h-full bg-darkObsidian rounded-full flex items-center justify-center text-gold">
+                        <i data-lucide="sparkles" class="w-10 h-10 animate-spin-slow"></i>
+                    </div>
+                </div>
+
+                <p class="font-cursive text-4xl sm:text-5xl text-blush">My Forever & Always</p>
+
+                <h2 id="proposalQuestionDisplay" class="font-cinzel text-3xl sm:text-5xl font-black text-white leading-tight text-gold-glow">
+                    Will You Be Mine Forever?
+                </h2>
+
+                <p class="text-champagne/90 text-sm sm:text-base max-w-md mx-auto font-light leading-relaxed">
+                    Life is a magnificent journey, but it only truly shines when I am walking it by your side.
+                </p>
+
+                <!-- Dynamic Buttons Container -->
+                <div id="proposalButtonsArea" class="pt-6 min-h-[120px] flex flex-col sm:flex-row items-center justify-center gap-4 relative">
+                    <!-- YES Button -->
+                    <button id="yesBtn" onclick="handleAcceptProposal()" class="w-full sm:w-auto px-10 py-4 rounded-full bg-gradient-to-r from-gold via-champagne to-gold hover:scale-110 text-darkObsidian font-cinzel font-bold text-lg tracking-wider shadow-2xl transition-all duration-300 z-20 flex items-center justify-center gap-2">
+                        <i data-lucide="heart" class="w-5 h-5 fill-darkObsidian"></i>
+                        <span>YES! A THOUSAND TIMES YES!</span>
+                    </button>
+
+                    <!-- PLAYFUL DODGING NO / THINK BUTTON -->
+                    <button id="noBtn" onmouseenter="dodgeNoButton()" onclick="dodgeNoButton()" class="w-full sm:w-auto px-6 py-4 rounded-full glass-card border border-gold/30 text-champagne/70 font-cinzel text-sm hover:text-white transition-all duration-200 z-10">
+                        <span id="noBtnText">Let me think...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- CELEBRATION & HIDDEN LETTER SECTION -->
+    <div id="celebrationSection" class="hidden fixed inset-0 z-50 bg-darkObsidian/98 overflow-y-auto p-4 sm:p-10 flex flex-col items-center justify-start">
+        <div class="max-w-3xl w-full my-auto py-10 space-y-10 text-center">
+
+            <!-- Celebration Header -->
+            <div class="space-y-4 animate-bounce-slow">
+                <div class="inline-block p-4 rounded-full bg-gold/10 border border-gold/40 text-gold mb-2">
+                    <i data-lucide="heart-handshake" class="w-12 h-12"></i>
+                </div>
+                <h2 class="font-cinzel text-4xl sm:text-6xl font-black text-white text-gold-glow">
+                    She Said YES! ❤
+                </h2>
+                <p class="font-cursive text-3xl sm:text-4xl text-blush">Our Forever Begins Today</p>
+            </div>
+
+            <!-- UNSEAL LETTER CONTAINER -->
+            <div class="parchment rounded-3xl p-8 sm:p-12 text-left relative shadow-2xl border border-gold/50 space-y-6 max-w-2xl mx-auto">
+                <div class="flex items-center justify-between border-b border-gold/20 pb-4">
+                    <div class="flex items-center gap-2 text-gold">
+                        <i data-lucide="mail-open" class="w-5 h-5"></i>
+                        <span class="font-cinzel text-xs tracking-widest uppercase">Secret Love Letter</span>
+                    </div>
+                    <span id="letterDateDisplay" class="text-xs text-champagne/50 font-mono">Forever & Always</span>
+                </div>
+
+                <!-- Envelope / Wax Seal Clickable Cover -->
+                <div id="waxSealCover" class="py-12 text-center space-y-4">
+                    <p class="text-xs tracking-widest text-gold/80 uppercase font-cinzel">Break the seal to read your letter</p>
+                    <button onclick="unsealLetter()" class="wax-seal w-24 h-24 rounded-full mx-auto flex items-center justify-center cursor-pointer border-2 border-gold/40">
+                        <span class="font-cinzel font-black text-2xl text-gold">❤</span>
+                    </button>
+                    <p class="text-xs text-champagne/50 italic">Click the seal</p>
+                </div>
+
+                <!-- Unsealed Letter Body -->
+                <div id="unsealedLetterContent" class="hidden space-y-6 pt-2 transition-all duration-700">
+                    <p id="letterSalutation" class="font-cursive text-3xl text-gold">
+                        My Dearest Love,
+                    </p>
+                    <div id="letterBodyDisplay" class="text-champagne/90 text-sm sm:text-base leading-relaxed font-light space-y-4 whitespace-pre-line border-l-2 border-blush/40 pl-4 py-1">
+                        When I look at you, I see my home, my peace, and my greatest adventure.
+                    </div>
+                    <div class="text-right pt-4 border-t border-gold/20">
+                        <p class="text-xs text-champagne/60 font-cinzel">Yours Forever,</p>
+                        <p id="yourNameDisplay" class="font-cursive text-2xl text-gold mt-1">Alexander</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap justify-center gap-4 pt-4">
+                <button onclick="triggerConfettiBurst()" class="px-6 py-3 rounded-full glass-card hover:border-gold text-champagne text-xs font-cinzel tracking-wider flex items-center gap-2">
+                    <i data-lucide="party-popper" class="w-4 h-4 text-gold"></i>
+                    <span>More Confetti!</span>
+                </button>
+                <button onclick="closeCelebration()" class="px-6 py-3 rounded-full bg-gold/10 hover:bg-gold/20 text-gold text-xs font-cinzel tracking-wider border border-gold/30">
+                    <span>Revisit Our Page</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- LIGHTBOX MODAL -->
+    <div id="lightboxModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4" onclick="closeLightbox()">
+        <div class="relative max-w-3xl w-full glass-card rounded-2xl overflow-hidden p-2" onclick="event.stopPropagation()">
+            <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-darkObsidian/80 text-white hover:text-gold">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <img id="lightboxImg" src="" alt="Memory Photo" class="w-full h-auto max-h-[75vh] object-contain rounded-xl">
+            <div class="p-4 text-center">
+                <h4 id="lightboxTitle" class="font-cinzel text-xl text-white font-bold">Memory</h4>
+                <p id="lightboxCaption" class="text-champagne/70 text-sm mt-1"></p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- CUSTOMIZER DRAWER MODAL -->
+    <div id="customizerModal" class="fixed inset-0 z-50 bg-darkObsidian/80 backdrop-blur-md hidden flex justify-end transition-all duration-300">
+        <div class="w-full max-w-md bg-darkObsidian border-l border-gold/30 h-full p-6 overflow-y-auto flex flex-col justify-between space-y-6">
+            <div>
+                <div class="flex items-center justify-between border-b border-gold/20 pb-4 mb-6">
+                    <div class="flex items-center gap-2 text-gold">
+                        <i data-lucide="sliders" class="w-5 h-5"></i>
+                        <h3 class="font-cinzel text-lg font-bold">Customize Proposal</h3>
+                    </div>
+                    <button onclick="closeCustomizer()" class="text-champagne/60 hover:text-gold">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <label class="block text-xs font-cinzel text-gold mb-1">Partner's Name</label>
+                        <input type="text" id="custPartnerName" class="w-full px-3 py-2 rounded-xl bg-velvet border border-gold/30 text-champagne focus:outline-none focus:border-gold" placeholder="e.g. Sophia">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-cinzel text-gold mb-1">Your Name</label>
+                        <input type="text" id="custYourName" class="w-full px-3 py-2 rounded-xl bg-velvet border border-gold/30 text-champagne focus:outline-none focus:border-gold" placeholder="e.g. Alexander">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-cinzel text-gold mb-1">Proposal Question</label>
+                        <input type="text" id="custProposalQuestion" class="w-full px-3 py-2 rounded-xl bg-velvet border border-gold/30 text-champagne focus:outline-none focus:border-gold" placeholder="Will You Be Mine Forever?">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-cinzel text-gold mb-1">Secret Love Letter</label>
+                        <textarea id="custLetterBody" rows="6" class="w-full px-3 py-2 rounded-xl bg-velvet border border-gold/30 text-champagne text-xs focus:outline-none focus:border-gold resize-none" placeholder="Write your heartfelt letter here..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3 pt-4 border-t border-gold/20">
+                <button onclick="saveCustomizations()" class="w-full py-3 rounded-full bg-gradient-to-r from-gold to-champagne text-darkObsidian font-cinzel font-bold text-xs uppercase tracking-wider shadow-lg hover:scale-[1.02] transition-transform">
+                    Save Changes
+                </button>
+                <button onclick="resetCustomizations()" class="w-full py-2 rounded-full border border-gold/20 text-champagne/60 hover:text-gold text-xs font-cinzel">
+                    Reset Defaults
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        /* -------------------------------------------------------------------------- */
+        /* STATE & INITIAL DATA                                                       */
+        /* -------------------------------------------------------------------------- */
+        const defaultData = {
+            partnerName: "Sophia",
+            yourName: "Alexander",
+            proposalQuestion: "Will You Be Mine Forever?",
+            letterBody: `When I look at you, I see my home, my peace, and my greatest adventure. From the quietest whispers to our wild laughter, you have filled my world with a light I never knew was missing.
+
+Thank you for holding my hand through life's twists and turns, for loving me so deeply, and for choosing to build a future together. 
+
+I promise to cherish you, protect your dreams, and love you endlessly through every chapter of our lives.`,
+            chapters: [
+                {
+                    title: "The Moment Our Worlds Collided",
+                    date: "First Meeting",
+                    number: "Chapter I",
+                    body: "It started with a simple hello, but in that single second, the universe quieted down. Every detail of that day remains etched into memory — the way the light caught your smile, the spontaneous laughter, and the soft realization that something extraordinary was unfolding."
+                },
+                {
+                    title: "Adventures & Midnight Conversations",
+                    date: "Growing Closer",
+                    number: "Chapter II",
+                    body: "From long road trips with endless playlists to late-night talks that lasted until dawn, every shared secret drew us closer. With you, even ordinary Tuesdays felt like magic."
+                },
+                {
+                    title: "Through Weathered Storms",
+                    date: "Unshakeable Bond",
+                    number: "Chapter III",
+                    body: "Love wasn't just about the sunny days; it was found in the way we held each other when challenges arose. Side by side, we learned that together, we could weather any storm."
+                },
+                {
+                    title: "The Prelude to Forever",
+                    date: "Today & Tomorrow",
+                    number: "Chapter IV",
+                    body: "Looking back at how far we've come, I know with absolute certainty where I belong. You are my present, my future, and the best part of every day."
+                }
+            ],
+            memories: [
+                {
+                    title: "Our First Date",
+                    date: "Spring 2022",
+                    desc: "Café coffee cups, endless talks, and butterflies that never quite went away.",
+                    img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
+                },
+                {
+                    title: "Unplanned Beach Trip",
+                    date: "Summer 2022",
+                    desc: "Sunset skies, ocean breeze, and footsteps left in the damp tide.",
+                    img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
+                },
+                {
+                    title: "Cozy Winter Evenings",
+                    date: "Winter 2023",
+                    desc: "Hot cocoa, fuzzy blankets, and warm smiles while watching rain hit the glass.",
+                    img: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=800&q=80"
+                },
+                {
+                    title: "Stargazing Night",
+                    date: "Autumn 2023",
+                    desc: "Lying under a canopy of stars, realizing my favorite star was right next to me.",
+                    img: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=800&q=80"
+                }
+            ],
+            giftVouchers: [
+                "🎟️ VOUCHER: One free romantic late-night dessert date + warm hugs on demand!",
+                "🎟️ VOUCHER: Immunity pass from doing dishes for a whole week!",
+                "🎟️ VOUCHER: Unlimited cozy movie night choices + mandatory popcorn sharing!",
+                "🎟️️ VOUCHER: Surprise weekend getaway trip planned entirely by me!"
+            ]
+        };
+
+        let appData = JSON.parse(localStorage.getItem('proposal_data')) || defaultData;
+        let currentChapterIdx = 0;
+        let noCount = 0;
+        let scanTimer = null;
+        let isAuroraActive = false;
+
+        /* -------------------------------------------------------------------------- */
+        /* AUDIO SYNTHESIZER                                                          */
+        /* -------------------------------------------------------------------------- */
+        let audioCtx = null;
+        let isPlayingAudio = false;
+        let audioTimer = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playRomanticChords() {
+            if (!audioCtx || !isPlayingAudio) return;
+
+            const chords = [
+                [261.63, 329.63, 392.00, 493.88], // Cmaj7
+                [220.00, 261.63, 329.63, 392.00], // Am9
+                [174.61, 220.00, 261.63, 329.63], // Fmaj7
+                [196.00, 261.63, 293.66, 392.00]  // Gsus4
+            ];
+
+            let chordIdx = 0;
+
+            function playNextChord() {
+                if (!isPlayingAudio) return;
+                const now = audioCtx.currentTime;
+                const currentNotes = chords[chordIdx];
+
+                currentNotes.forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    gain.gain.setValueAtTime(0, now);
+                    gain.gain.linearRampToValueAtTime(0.04, now + 0.8 + (i * 0.1));
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 3.8);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(now + (i * 0.15));
+                    osc.stop(now + 4.0);
+                });
+
+                chordIdx = (chordIdx + 1) % chords.length;
+                audioTimer = setTimeout(playNextChord, 3500);
+            }
+
+            playNextChord();
+        }
+
+        function toggleAudio() {
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const musicIcon = document.getElementById('musicIcon');
+            const musicStatus = document.getElementById('musicStatus');
+
+            if (isPlayingAudio) {
+                isPlayingAudio = false;
+                clearTimeout(audioTimer);
+                musicIcon.setAttribute('data-lucide', 'music');
+                musicStatus.textContent = 'Play Music';
+            } else {
+                isPlayingAudio = true;
+                playRomanticChords();
+                musicIcon.setAttribute('data-lucide', 'volume-2');
+                musicStatus.textContent = 'Playing Ambient Loop';
+            }
+            lucide.createIcons();
+        }
+
+        function playChimeEffect(freq = 523.25) {
+            if (!audioCtx) initAudio();
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(freq * 2, now + 0.3);
+
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.4);
+        }
+
+        function playWarningSound() {
+            if (!audioCtx) initAudio();
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.linearRampToValueAtTime(400, now + 0.2);
+
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* RENDER APP CONTENT                                                         */
+        /* -------------------------------------------------------------------------- */
+        function renderApp() {
+            document.getElementById('partnerNameDisplay').textContent = appData.partnerName;
+            document.getElementById('yourNameDisplay').textContent = appData.yourName;
+            document.getElementById('proposalQuestionDisplay').textContent = appData.proposalQuestion;
+            document.getElementById('letterBodyDisplay').textContent = appData.letterBody;
+
+            renderChapterTabs();
+            displayChapter(currentChapterIdx);
+            renderTimeline();
+            lucide.createIcons();
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* CHAPTERS LOGIC                                                             */
+        /* -------------------------------------------------------------------------- */
+        function renderChapterTabs() {
+            const tabsContainer = document.getElementById('chapterTabs');
+            tabsContainer.innerHTML = '';
+
+            appData.chapters.forEach((chap, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 rounded-full text-xs font-cinzel transition-all duration-300 border ${
+                    idx === currentChapterIdx 
+                    ? 'bg-gold text-darkObsidian font-bold border-gold shadow-lg' 
+                    : 'glass-card text-champagne/80 hover:border-gold/50'
+                }`;
+                btn.textContent = `Chapter ${idx + 1}`;
+                btn.onclick = () => {
+                    playChimeEffect();
+                    currentChapterIdx = idx;
+                    renderChapterTabs();
+                    displayChapter(idx);
+                };
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        function displayChapter(idx) {
+            const card = document.getElementById('chapterCard');
+            const chap = appData.chapters[idx];
+
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(10deg)';
+
+            setTimeout(() => {
+                document.getElementById('chapterNumber').textContent = chap.number || `Chapter ${idx + 1}`;
+                document.getElementById('chapterDate').querySelector('span').textContent = chap.date;
+                document.getElementById('chapterTitle').textContent = chap.title;
+                document.getElementById('chapterBody').textContent = chap.body;
+
+                document.getElementById('prevChapterBtn').disabled = (idx === 0);
+                document.getElementById('nextChapterBtn').disabled = (idx === appData.chapters.length - 1);
+
+                const dotsContainer = document.getElementById('chapterDots');
+                dotsContainer.innerHTML = '';
+                appData.chapters.forEach((_, i) => {
+                    const dot = document.createElement('div');
+                    dot.className = `w-2 h-2 rounded-full transition-all ${i === idx ? 'w-6 bg-gold' : 'bg-gold/30'}`;
+                    dotsContainer.appendChild(dot);
+                });
+
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 200);
+        }
+
+        function prevChapter() {
+            if (currentChapterIdx > 0) {
+                playChimeEffect();
+                currentChapterIdx--;
+                renderChapterTabs();
+                displayChapter(currentChapterIdx);
+            }
+        }
+
+        function nextChapter() {
+            if (currentChapterIdx < appData.chapters.length - 1) {
+                playChimeEffect();
+                currentChapterIdx++;
+                renderChapterTabs();
+                displayChapter(currentChapterIdx);
+            }
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* TIMELINE LOGIC                                                             */
+        /* -------------------------------------------------------------------------- */
+        function renderTimeline() {
+            const container = document.getElementById('timelineContainer');
+            container.innerHTML = '';
+
+            appData.memories.forEach((mem, idx) => {
+                const item = document.createElement('div');
+                item.className = 'relative pl-8 sm:pl-10 group';
+
+                item.innerHTML = `
+                    <div class="absolute -left-[17px] top-1.5 w-8 h-8 rounded-full bg-darkObsidian border-2 border-gold flex items-center justify-center text-gold group-hover:scale-125 transition-transform shadow-lg">
+                        <i data-lucide="heart" class="w-4 h-4 fill-gold/20"></i>
+                    </div>
+
+                    <div class="glass-card glass-card-hover rounded-2xl p-5 border border-gold/20 cursor-pointer" onclick="openLightbox('${mem.img}', '${mem.title}', '${mem.desc}')">
+                        <div class="flex flex-col md:flex-row gap-5 items-center">
+                            <div class="w-full md:w-48 h-36 rounded-xl overflow-hidden relative shrink-0 border border-gold/20">
+                                <img src="${mem.img}" alt="${mem.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/2A0813/F3E5AB?text=Memory+Photo'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-darkObsidian/60 to-transparent"></div>
+                                <span class="absolute bottom-2 left-2 text-[10px] font-mono bg-darkObsidian/80 text-gold px-2 py-0.5 rounded border border-gold/30">
+                                    ${mem.date}
+                                </span>
+                            </div>
+                            <div class="space-y-2 text-left">
+                                <h3 class="font-cinzel text-lg font-bold text-white group-hover:text-gold transition-colors">${mem.title}</h3>
+                                <p class="text-champagne/80 text-xs sm:text-sm font-light leading-relaxed">${mem.desc}</p>
+                                <span class="inline-flex items-center text-[11px] text-blush font-cinzel pt-1">
+                                    Expand Memory <i data-lucide="maximize-2" class="w-3 h-3 ml-1"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* SUSPICIOUS VAULT BUTTON HANDLERS                                           */
+        /* -------------------------------------------------------------------------- */
+        function pressForbiddenButton() {
+            playWarningSound();
+            document.getElementById('forbiddenModal').classList.remove('hidden');
+            triggerConfettiBurst();
+        }
+
+        function closeForbiddenModal() {
+            document.getElementById('forbiddenModal').classList.add('hidden');
+        }
+
+        function triggerQuickSuspiciousModal() {
+            pressForbiddenButton();
+        }
+
+        function startHeartScan() {
+            playChimeEffect(400);
+            const scanLaser = document.getElementById('scanLaser');
+            const scanBtnText = document.getElementById('scanBtnText');
+            scanLaser.classList.remove('hidden');
+            scanBtnText.textContent = "ANALYZING HEART COMPATIBILITY...";
+
+            let progress = 0;
+            scanTimer = setInterval(() => {
+                progress += 25;
+                playChimeEffect(400 + progress * 5);
+                if (progress >= 100) {
+                    clearInterval(scanTimer);
+                    stopHeartScan();
+                    openScanModal();
+                }
+            }, 500);
+        }
+
+        function stopHeartScan() {
+            if (scanTimer) clearInterval(scanTimer);
+            document.getElementById('scanLaser').classList.add('hidden');
+            document.getElementById('scanBtnText').textContent = "HOLD TO SCAN HEART RATE";
+        }
+
+        function openScanModal() {
+            document.getElementById('scanModal').classList.remove('hidden');
+            triggerConfettiBurst();
+        }
+
+        function closeScanModal() {
+            document.getElementById('scanModal').classList.add('hidden');
+        }
+
+        function revealMysteryGift() {
+            playChimeEffect(600);
+            const vouchers = appData.giftVouchers || defaultData.giftVouchers;
+            const randomVoucher = vouchers[Math.floor(Math.random() * vouchers.length)];
+
+            document.getElementById('giftContent').textContent = randomVoucher;
+            document.getElementById('giftModal').classList.remove('hidden');
+            triggerConfettiBurst();
+        }
+
+        function closeGiftModal() {
+            document.getElementById('giftModal').classList.add('hidden');
+        }
+
+        function triggerCosmicAurora() {
+            playChimeEffect(800);
+            isAuroraActive = true;
+            triggerConfettiBurst();
+            setTimeout(() => { isAuroraActive = false; }, 8000);
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* LIGHTBOX                                                                   */
+        /* -------------------------------------------------------------------------- */
+        function openLightbox(img, title, caption) {
+            playChimeEffect();
+            document.getElementById('lightboxImg').src = img;
+            document.getElementById('lightboxTitle').textContent = title;
+            document.getElementById('lightboxCaption').textContent = caption;
+            document.getElementById('lightboxModal').classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightboxModal').classList.add('hidden');
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* MYSTERY GATE & COUNTDOWN                                                   */
+        /* -------------------------------------------------------------------------- */
+        function triggerCountdownSequence() {
+            playChimeEffect();
+            document.getElementById('readyBtn').classList.add('hidden');
+            const countdownBox = document.getElementById('countdownBox');
+            const countdownNum = document.getElementById('countdownNum');
+            countdownBox.classList.remove('hidden');
+
+            let count = 3;
+            countdownNum.textContent = count;
+
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownNum.textContent = count;
+                    playChimeEffect();
+                } else {
+                    clearInterval(timer);
+                    countdownBox.classList.add('hidden');
+                    openProposalModal();
+                }
+            }, 1000);
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* PROPOSAL MODAL & BUTTON DODGING                                            */
+        /* -------------------------------------------------------------------------- */
+        function openProposalModal() {
+            const modal = document.getElementById('proposalModal');
+            modal.classList.remove('hidden');
+            triggerConfettiBurst();
+        }
+
+        function dodgeNoButton() {
+            const noBtn = document.getElementById('noBtn');
+            const noBtnText = document.getElementById('noBtnText');
+            noCount++;
+
+            const playfulPhrases = [
+                "Are you sure? 😜",
+                "Nice try! 😉",
+                "Wrong button! ❤",
+                "Try again! ✨",
+                "You can't escape my love! 🌹"
+            ];
+
+            noBtnText.textContent = playfulPhrases[noCount % playfulPhrases.length];
+
+            const x = (Math.random() - 0.5) * 200;
+            const y = (Math.random() - 0.5) * 120;
+            noBtn.style.transform = `translate(${x}px, ${y}px)`;
+
+            if (noCount >= 5) {
+                noBtn.className = "w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-blush to-crimsonGlow text-white font-cinzel font-bold text-sm tracking-wider shadow-lg transition-all duration-300 z-20";
+                noBtnText.textContent = "YES! (Okay you convinced me ❤)";
+                noBtn.onclick = handleAcceptProposal;
+                noBtn.onmouseenter = null;
+            }
+        }
+
+        function handleAcceptProposal() {
+            playChimeEffect();
+            document.getElementById('proposalModal').classList.add('hidden');
+            document.getElementById('celebrationSection').classList.remove('hidden');
+            triggerCelebrationConfetti();
+        }
+
+        function unsealLetter() {
+            playChimeEffect();
+            document.getElementById('waxSealCover').classList.add('hidden');
+            document.getElementById('unsealedLetterContent').classList.remove('hidden');
+            triggerConfettiBurst();
+        }
+
+        function closeCelebration() {
+            document.getElementById('celebrationSection').classList.add('hidden');
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* CONFETTI ANIMATIONS                                                         */
+        /* -------------------------------------------------------------------------- */
+        function triggerConfettiBurst() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 90,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#D4AF37', '#FF6B8B', '#F3E5AB', '#8B0032', '#00F2FE', '#FF1493']
+                });
+            }
+        }
+
+        function triggerCelebrationConfetti() {
+            if (typeof confetti !== 'function') return;
+
+            const duration = 4 * 1000;
+            const animationEnd = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 6,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#D4AF37', '#FF6B8B', '#F3E5AB']
+                });
+                confetti({
+                    particleCount: 6,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#D4AF37', '#FF6B8B', '#F3E5AB']
+                });
+
+                if (Date.now() < animationEnd) {
+                    requestAnimationFrame(frame);
+                }
+            })();
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* CUSTOMIZER DRAWER                                                         */
+        /* -------------------------------------------------------------------------- */
+        function openCustomizer() {
+            playChimeEffect();
+            document.getElementById('custPartnerName').value = appData.partnerName;
+            document.getElementById('custYourName').value = appData.yourName;
+            document.getElementById('custProposalQuestion').value = appData.proposalQuestion;
+            document.getElementById('custLetterBody').value = appData.letterBody;
+            document.getElementById('customizerModal').classList.remove('hidden');
+        }
+
+        function closeCustomizer() {
+            document.getElementById('customizerModal').classList.add('hidden');
+        }
+
+        function saveCustomizations() {
+            playChimeEffect();
+            appData.partnerName = document.getElementById('custPartnerName').value.trim() || defaultData.partnerName;
+            appData.yourName = document.getElementById('custYourName').value.trim() || defaultData.yourName;
+            appData.proposalQuestion = document.getElementById('custProposalQuestion').value.trim() || defaultData.proposalQuestion;
+            appData.letterBody = document.getElementById('custLetterBody').value.trim() || defaultData.letterBody;
+
+            localStorage.setItem('proposal_data', JSON.stringify(appData));
+            renderApp();
+            closeCustomizer();
+        }
+
+        function resetCustomizations() {
+            playChimeEffect();
+            appData = JSON.parse(JSON.stringify(defaultData));
+            localStorage.removeItem('proposal_data');
+            renderApp();
+            closeCustomizer();
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* BACKGROUND PARTICLE CANVAS                                                 */
+        /* -------------------------------------------------------------------------- */
+        function initParticleCanvas() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const particles = Array.from({ length: 45 }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: Math.random() * 3 + 1,
+                speedY: Math.random() * -0.6 - 0.2,
+                speedX: (Math.random() - 0.5) * 0.4,
+                opacity: Math.random() * 0.5 + 0.2,
+                isHeart: Math.random() > 0.5
+            }));
+
+            function drawHeart(x, y, size, opacity) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.beginPath();
+                ctx.fillStyle = isAuroraActive ? `rgba(0, 242, 254, ${opacity})` : `rgba(255, 107, 139, ${opacity})`;
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-size / 2, -size / 2, -size, size / 3, 0, size);
+                ctx.bezierCurveTo(size, size / 3, size / 2, -size / 2, 0, 0);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                if (isAuroraActive) {
+                    const gradient = ctx.createLinearGradient(0, 0, width, height);
+                    gradient.addColorStop(0, 'rgba(128, 0, 128, 0.15)');
+                    gradient.addColorStop(0.5, 'rgba(255, 20, 147, 0.2)');
+                    gradient.addColorStop(1, 'rgba(0, 242, 254, 0.15)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, width, height);
+                }
+
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+
+                    if (p.y < -20) p.y = height + 20;
+                    if (p.x < -20) p.x = width + 20;
+                    if (p.x > width + 20) p.x = -20;
+
+                    if (p.isHeart) {
+                        drawHeart(p.x, p.y, p.size * 2, p.opacity);
+                    } else {
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fillStyle = isAuroraActive ? `rgba(255, 215, 0, ${p.opacity})` : `rgba(212, 175, 55, ${p.opacity})`;
+                        ctx.fill();
+                    }
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* INITIALIZATION ON WINDOW LOAD                                              */
+        /* -------------------------------------------------------------------------- */
+        window.onload = function() {
+            renderApp();
+            initParticleCanvas();
+        };
+    </script>
+</body>
+</html>
